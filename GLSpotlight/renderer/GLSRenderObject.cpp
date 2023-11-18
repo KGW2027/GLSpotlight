@@ -15,7 +15,7 @@ void GLSRenderObject::update_window_size()
     windowsize[1] = glutGet(GLUT_WINDOW_HEIGHT);
 }
 
-void GLSRenderObject::gl_pos_to_glut_pos(float** gl_pos)
+void GLSRenderObject::gl_pos_to_glut_pos(glm::vec4* gl_pos)
 {
     update_window_size();
     
@@ -27,7 +27,7 @@ void GLSRenderObject::gl_pos_to_glut_pos(float** gl_pos)
     (*gl_pos)[1] = -(height * (gp1 + 1) / 2.f) + height;
 }
 
-void GLSRenderObject::glut_pos_to_gl_pos(float** glut_pos)
+void GLSRenderObject::glut_pos_to_gl_pos(glm::vec4* glut_pos)
 {
     update_window_size();
     (*glut_pos)[0] = (*glut_pos)[0] * 2 / static_cast<float>(windowsize[0]) - 1;

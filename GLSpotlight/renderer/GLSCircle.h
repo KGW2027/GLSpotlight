@@ -13,27 +13,25 @@ class GLSCircle : GLSRenderObject
 {
      circle_range radius_data;
      screen_pos circle_center;
-     float min_radius;
+     float max_radius;
+     bool locked;
 
      void get_point_pos(float theta, float radius, screen_pos* pos);
      
 public:
-     GLSCircle() : min_radius(100.f)
+     GLSCircle() : max_radius(100.f), locked(false)
      {
          radius_data = new float[CIRCULAR_PRECISION]{0};
+         set_random_radius();
          
-         circle_center = new float[3]{0, 0, 0};
+         circle_center = glm::vec4(1280/2, 720/2, 0, 0);
          windowsize = new int[2];
+         srand(time(NULL));
      }
     
     void render() override;
 
-    void set_random_radius()
-    {
-        srand(time(NULL));
-        for(int i = 0 ; i < CIRCULAR_PRECISION ; i++)
-            radius_data[i] = rand() % 200 + 50;
-    }
+    void set_random_radius();
 
     void set_radius(float* radiuss)
     {

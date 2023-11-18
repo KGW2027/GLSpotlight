@@ -1,6 +1,8 @@
 ﻿#pragma once
 
-typedef float* screen_pos;
+#include <glm/glm.hpp>
+
+typedef glm::vec4 screen_pos;
 typedef int* window_size;
 
 class GLSRenderObject
@@ -10,8 +12,8 @@ protected:
     
     void update_window_size();
 
-    void gl_pos_to_glut_pos(float** gl_pos);
-    void glut_pos_to_gl_pos(float** glut_pos);
+    void gl_pos_to_glut_pos(glm::vec4* gl_pos);
+    void glut_pos_to_gl_pos(glm::vec4* glut_pos);
     
 public:
     GLSRenderObject() : windowsize(new int[2]) {}
