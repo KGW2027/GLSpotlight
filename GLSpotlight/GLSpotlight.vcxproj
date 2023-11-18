@@ -158,9 +158,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GLSpotlight.cpp" />
+    <ClCompile Include="renderer\GLSCircle.cpp" />
+    <ClCompile Include="renderer\GLSRenderObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="renderer\GLSCircle.h" />
+    <ClInclude Include="renderer\GLSRenderObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

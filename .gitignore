@@ -1,2 +1,5 @@
 packages/
 .idea/
+GLSpotlight/x64/
+x64/
+*.mp3
