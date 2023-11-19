@@ -5,7 +5,7 @@
 
 #include "GLSRenderObject.h"
 
-#define CIRCULAR_PRECISION 90
+#define CIRCULAR_PRECISION 360
 
 typedef float* circle_range;
 
@@ -17,9 +17,11 @@ class GLSCircle : GLSRenderObject
      bool locked;
 
      void get_point_pos(float theta, float radius, screen_pos* pos);
+
+    void set_hue_based_color(int idx);
      
 public:
-     GLSCircle() : max_radius(100.f), locked(false)
+     GLSCircle() : max_radius(200.f), locked(false)
      {
          radius_data = new float[CIRCULAR_PRECISION]{max_radius};
          // set_random_radius();

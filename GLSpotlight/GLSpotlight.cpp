@@ -5,7 +5,7 @@
 #include "MusicReader.h"
 
 GLSCircle circular;
-std::thread music_thread;
+MusicReader music_reader;
 
 void init();
 void initMusic();
@@ -15,11 +15,17 @@ void display();
 void callback(float** array, int window)
 {
     float* circle_weight = new float[CIRCULAR_PRECISION]{0.0f};
+    float fmax = FLT_MIN;
     int range = static_cast<int>(ceil(static_cast<float>(window) / static_cast<float>(CIRCULAR_PRECISION)));
+    
     for(int i = 0 ; i < window ; i++)
+    {
         circle_weight[i/range] += (*array)[i];
+        fmax = std::max(fmax, circle_weight[i/range]);
+    }
+    
     for(int i = 0 ; i < CIRCULAR_PRECISION ; i++)
-        circle_weight[i] /= range;
+        circle_weight[i] = pow(circle_weight[i] / fmax, 3);
     
     circular.set_radius(circle_weight);
 }
@@ -36,8 +42,6 @@ int main(int argc, char** argv) {
     glutDisplayFunc(display);
     glutTimerFunc(50, redisplay, 0);
     glutMainLoop();
-
-    printf("Hello, world");
     
     return 0;
 }
@@ -55,12 +59,12 @@ void init()
 void redisplay(int v)
 {
     glutPostRedisplay();
-    glutTimerFunc(50, redisplay, v);
+    glutTimerFunc(90, redisplay, v);
 }
 
 void initMusic()
 {
     const wchar_t* filename = L"../test.wav";
-    MusicReader reader = MusicReader(filename);
-    reader.play_music(callback);
+    music_reader = MusicReader(filename);
+    music_reader.play_music(callback);
 }

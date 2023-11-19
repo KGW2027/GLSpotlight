@@ -66,6 +66,9 @@ class MusicReader
 
     void play_music_internal(void (*callback)(float** array, int len));
 public:
+
+    MusicReader(){}
+    
     explicit MusicReader(file_path path);
 
     void play_music(void (*callback)(float** array, int len));

@@ -129,10 +129,7 @@ void MusicReader::read_file()
 
 void MusicReader::play_music_internal(void (*callback)(float** array, int len))
 {
-    
-    HRESULT hr = S_OK;
-    
-    hr = MFStartup(MF_VERSION);
+    HRESULT hr = MFStartup(MF_VERSION);
     check(hr, L"MF Initiate Exception");
 
     IMFSourceReader* source_reader = nullptr;
@@ -167,7 +164,7 @@ void MusicReader::play_music_internal(void (*callback)(float** array, int len))
     writer->SetInputMediaType(0, input_type, nullptr);
 
     writer->BeginWriting();
-    int now_idx = 0;
+    int now_idx = 20;
     int* shape = new int[2];
     LONGLONG bef_ts = 0;
     output(&shape);
@@ -191,23 +188,17 @@ void MusicReader::play_music_internal(void (*callback)(float** array, int len))
             break;
         }
 
-        // // 입력하는 스트림 재생 이전 간격을 timestamp만큼 둔다.
-        // if (streamFlags & MF_SOURCE_READERF_STREAMTICK)
-        //     writer->SendStreamTick(0, timestamp);
-
         // Sample이 유효하지 않다면 스킵한다.
         if (!sample) 
             continue;
-
-        // Stream에 Sample을 입력한다. (재생)
-        writer->WriteSample(0, sample);
-
+        
         if(now_idx < shape[0])
             callback(&result_[now_idx++], shape[1]);
         std::this_thread::sleep_for(std::chrono::milliseconds((timestamp-bef_ts) / 10'000)*0.9);
+        
+        // Stream에 Sample을 입력한다. (재생)
+        writer->WriteSample(0, sample);
         bef_ts = timestamp;
-
-        // if(timestamp > 10'000'000) break;
     }
     writer->Finalize();
 }
