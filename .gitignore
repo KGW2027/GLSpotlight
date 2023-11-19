@@ -3,3 +3,5 @@ packages/
 GLSpotlight/x64/
 x64/
 *.mp3
+*.wav
+*.bak

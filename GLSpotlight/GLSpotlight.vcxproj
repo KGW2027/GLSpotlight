@@ -3,6 +3,8 @@
   <Import Project="..\packages\freeglut.3.0.0.v140.1.0.2\build\freeglut.3.0.0.v140.props" Condition="Exists('..\packages\freeglut.3.0.0.v140.1.0.2\build\freeglut.3.0.0.v140.props')" />
   <Import Project="..\packages\glm.0.9.9.800\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.9.800\build\native\glm.targets')" />
   <Import Project="..\packages\glew.v140.1.12.0\build\native\glew.v140.targets" Condition="Exists('..\packages\glew.v140.1.12.0\build\native\glew.v140.targets')" />
+  <Import Project="..\packages\fftw_339.3.3.9.202108273\build\native\fftw_339.props" Condition="Exists('..\packages\fftw_339.3.3.9.202108273\build\native\fftw_339.props')" />
+  <Import Project="..\packages\BassBoom.Native.0.0.2.1\BassBoom.Native.targets" Condition="Exists('..\packages\BassBoom.Native.0.0.2.1\BassBoom.Native.targets')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -160,6 +162,8 @@
     <ClCompile Include="GLSpotlight.cpp" />
     <ClCompile Include="renderer\GLSCircle.cpp" />
     <ClCompile Include="renderer\GLSRenderObject.cpp" />
+    <ClCompile Include="MusicReader.cpp" />
+    <ClCompile Include="Stft.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -167,6 +171,8 @@
   <ItemGroup>
     <ClInclude Include="renderer\GLSCircle.h" />
     <ClInclude Include="renderer\GLSRenderObject.h" />
+    <ClInclude Include="MusicReader.h" />
+    <ClInclude Include="Stft.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
