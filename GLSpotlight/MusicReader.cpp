@@ -19,6 +19,11 @@ MusicReader::MusicReader(const wchar_t* path) : is_valid_(false)
     stft();
 }
 
+void MusicReader::play_music(void(* callback)(float** array, int len))
+{
+    play_music_internal(callback);
+}
+
 double MusicReader::combine_float64(BYTE* array, DWORD* idx)
 {
     uint32_t combine = 0;
@@ -85,11 +90,11 @@ void MusicReader::read_file()
         sample_rate_ = MFGetAttributeUINT32(media_type, MF_MT_AUDIO_SAMPLES_PER_SECOND, 0);
         PROPVARIANT duration;
         source_reader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE, MF_PD_DURATION, &duration);
-        LONGLONG quadpart = duration.hVal.QuadPart;
+        // LONGLONG quadpart = duration.hVal.QuadPart;
         sample_count = static_cast<DWORD>(duration.hVal.QuadPart * sample_rate_ / 10'000'000);
     }
 
-    printf("SAMPLE SIZE : %lld\n", sample_count);
+    // printf("SAMPLE SIZE : %lld\n", sample_count);
 
     data_ = new float[sample_count]{0.f};
     data_len_ = 0;
@@ -122,7 +127,7 @@ void MusicReader::read_file()
     }
 }
 
-void MusicReader::play_music(void (*callback)(float** array, int len))
+void MusicReader::play_music_internal(void (*callback)(float** array, int len))
 {
     
     HRESULT hr = S_OK;
@@ -196,11 +201,13 @@ void MusicReader::play_music(void (*callback)(float** array, int len))
 
         // Stream에 Sample을 입력한다. (재생)
         writer->WriteSample(0, sample);
-        
+
         if(now_idx < shape[0])
             callback(&result_[now_idx++], shape[1]);
         std::this_thread::sleep_for(std::chrono::milliseconds((timestamp-bef_ts) / 10'000)*0.9);
         bef_ts = timestamp;
+
+        // if(timestamp > 10'000'000) break;
     }
     writer->Finalize();
 }
@@ -244,13 +251,8 @@ void MusicReader::stft()
 
         // Apply
         float* chunks = new float[WINDOW_SIZE / 2];
-        float mindB = 999.f, maxdB = -999.f;
         for(int i = 0 ; i < WINDOW_SIZE/2 ; i++)
-        {
             chunks[i] = 5 * (log10(max(AMIN, out[i][0] * out[i][0])) - log10(AMIN));
-            mindB = min(mindB, chunks[i]);
-            maxdB = max(maxdB, chunks[i]);
-        }
         result_[num_chunks] = chunks;
 
         // Next

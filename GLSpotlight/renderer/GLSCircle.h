@@ -21,8 +21,8 @@ class GLSCircle : GLSRenderObject
 public:
      GLSCircle() : max_radius(100.f), locked(false)
      {
-         radius_data = new float[CIRCULAR_PRECISION]{0};
-         set_random_radius();
+         radius_data = new float[CIRCULAR_PRECISION]{max_radius};
+         // set_random_radius();
          
          circle_center = glm::vec4(1280/2, 720/2, 0, 0);
          windowsize = new int[2];
@@ -33,8 +33,5 @@ public:
 
     void set_random_radius();
 
-    void set_radius(float* radiuss)
-    {
-        radius_data = radiuss;
-    }
+    void set_radius(float* radiuss);
 };

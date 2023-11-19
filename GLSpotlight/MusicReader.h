@@ -14,6 +14,7 @@
 #pragma comment(lib, "ole32")
 
 #include <fftw3.h>
+#include <thread>
 #include <vector>
 
 typedef float* read_data;
@@ -63,10 +64,11 @@ class MusicReader
 
     void stft();
 
+    void play_music_internal(void (*callback)(float** array, int len));
 public:
     explicit MusicReader(file_path path);
 
     void play_music(void (*callback)(float** array, int len));
-
+    
     result output(int** length);
 };

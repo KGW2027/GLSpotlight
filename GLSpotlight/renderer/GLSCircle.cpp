@@ -1,6 +1,5 @@
 ﻿#include "GLSCircle.h"
 
-#include <math.h>
 #include <windows.h>
 #include <stdio.h>
 #include <gl/freeglut.h>
@@ -19,9 +18,6 @@ void GLSCircle::get_point_pos(float theta, float radius, screen_pos* pos)
 
 void GLSCircle::render()
 {
-    if(locked) return;
-    locked = true;
-    
     GLSRenderObject::render();
 
     glMatrixMode(GL_MODELVIEW);
@@ -37,9 +33,6 @@ void GLSCircle::render()
     }
     glEnd();
     glutSwapBuffers();
-    
-    locked = false;
-    
 }
 
 void GLSCircle::set_random_radius()
@@ -48,4 +41,10 @@ void GLSCircle::set_random_radius()
     
     for(int i = 0 ; i < CIRCULAR_PRECISION ; i++)
         radius_data[i] = (static_cast<float>(rand()) / RAND_MAX + 1) * max_radius;
+}
+
+void GLSCircle::set_radius(float* radiuss)
+{
+    for(int i = 0 ; i < CIRCULAR_PRECISION ; i++)
+        radius_data[i] = max(max_radius/4, radiuss[i] * 7);
 }
