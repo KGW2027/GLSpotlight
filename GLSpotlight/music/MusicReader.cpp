@@ -164,7 +164,7 @@ void MusicReader::play_music_internal(void (*callback)(float** array, int len))
     writer->SetInputMediaType(0, input_type, nullptr);
 
     writer->BeginWriting();
-    int now_idx = 20;
+    int now_idx = 85;
     int* shape = new int[2];
     LONGLONG bef_ts = 0;
     output(&shape);

@@ -2,20 +2,19 @@
 
 #include <functional>
 #include <iostream>
+#include <vector>
 #include <windows.h>
 
 #include <mfapi.h>
 #include <mfidl.h>
+
+#include <fftw3.h>
 
 #pragma comment(lib, "mfplat")
 #pragma comment(lib, "mfuuid")
 #pragma comment(lib, "mfreadwrite")
 #pragma comment(lib, "mf")
 #pragma comment(lib, "ole32")
-
-#include <fftw3.h>
-#include <thread>
-#include <vector>
 
 typedef float* read_data;
 typedef float** result;
