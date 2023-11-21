@@ -49,7 +49,7 @@ void GLSCircle::render()
     for(int i = 0 ; i < CIRCULAR_PRECISION ; i++)
     {
         set_hue_based_color(i);
-        float shift = 1920.f * 0.9f / CIRCULAR_PRECISION * static_cast<float>(i+1);
+        float shift = 1280.f * 0.9f / CIRCULAR_PRECISION * static_cast<float>(i+1) + 1280.f * 0.05;
         glm::vec4 pos(shift, 360-radius_data_[i], 0, 1), btm(shift, 360, 0, 1);
         glut_pos_to_gl_pos(&pos);
         glut_pos_to_gl_pos(&btm);
@@ -75,6 +75,14 @@ void GLSCircle::render()
     glVertex2f(-1.0, avg_db_);
     glVertex2f(1.0, avg_db_);
     glEnd();
+
+    glRasterPos2f(.8, avg_db_+.05);
+    std::string dbstr = std::to_string(avg_db_ * 360 / 4);
+    for(int idx = 0 ; idx < dbstr.length() ; idx++)
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, dbstr.at(idx));
+    glutBitmapCharacter(GLUT_BITMAP_9_BY_15, ' ');
+    glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'd');
+    glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'B');
 
     glColor3f(1.f, .0, .0);
     glRasterPos2f(.0, -.5);

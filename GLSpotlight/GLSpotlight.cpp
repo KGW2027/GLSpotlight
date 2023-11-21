@@ -60,7 +60,7 @@ void redisplay(int v)
 
 void initMusic()
 {
-    const wchar_t* filename = L"../test4.wav";
+    const wchar_t* filename = L"../test2.wav";
     music_reader = MusicReader(filename);
     circular.set_music_reader(&music_reader);
     std::thread render_thread(&GLSCircle::play, &circular);
