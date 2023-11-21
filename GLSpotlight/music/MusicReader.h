@@ -16,8 +16,8 @@
 #pragma comment(lib, "mf")
 #pragma comment(lib, "ole32")
 
-typedef float* read_data;
-typedef float** result;
+typedef double* read_data;
+typedef double** result;
 typedef const wchar_t* file_path;
 
 #define WINDOW_SIZE 2048
@@ -29,7 +29,13 @@ class MusicReader
     file_path   path_;
     read_data   data_;
     result      result_;
-    DWORD       data_len_, sample_rate_;
+    DWORD       data_len_;
+    DWORD       sample_rate_;
+    LONGLONG    time_term_;
+    LONGLONG    length_;
+    UINT32      bit_depth_;
+    UINT32      num_channels_;
+    UINT32      num_chunks_;
     bool        is_valid_;
     
         // HRESULT의 결과가 실패(<0)이면 오류 메세지 및 콜백 함수 실행
@@ -53,6 +59,8 @@ class MusicReader
     float combine_float32(BYTE* array, DWORD* idx);
     DWORD combine_int32(BYTE* array, DWORD* idx);
     WORD combine_int16(BYTE* array, DWORD* idx);
+    double combine_audio_data(BYTE* array, DWORD* idx);
+    void normalize(double* data);
 
     bool check_header(BYTE one, BYTE two)
     {
@@ -62,15 +70,13 @@ class MusicReader
     void read_file();
 
     void stft();
-
-    void play_music_internal(void (*callback)(float** array, int len));
 public:
 
     MusicReader(){}
     
     explicit MusicReader(file_path path);
 
-    void play_music(void (*callback)(float** array, int len));
+    void play_music();
     
-    result output(int** length);
+    result output(UINT32** length, LONGLONG* timestamp, LONGLONG* time_length);
 };

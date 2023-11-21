@@ -19,11 +19,6 @@ MusicReader::MusicReader(const wchar_t* path) : is_valid_(false)
     stft();
 }
 
-void MusicReader::play_music(void(* callback)(float** array, int len))
-{
-    play_music_internal(callback);
-}
-
 double MusicReader::combine_float64(BYTE* array, DWORD* idx)
 {
     uint32_t combine = 0;
@@ -64,6 +59,32 @@ WORD MusicReader::combine_int16(BYTE* array, DWORD* idx)
     return result;
 }
 
+double MusicReader::combine_audio_data(BYTE* array, DWORD* idx)
+{
+    uint64_t combine = 0;
+    double sum = 0.;
+
+    for(UINT32 channel = 0 ; channel < num_channels_ ; channel++)
+    {
+        for(int shift = bit_depth_-8 ; shift >= 0 ; shift -= 8)
+            combine |= static_cast<uint64_t>(array[(*idx)++]) << shift;
+        sum += combine;
+    }
+
+    return sum / num_channels_;
+}
+
+void MusicReader::normalize(double* data)
+{
+    UINT64 num = 1;
+    for(int bits = bit_depth_ ; bits > 0 ; bits--)
+    {
+        num <<= 1;
+        num++;
+    }
+    *data /= static_cast<double>(num);
+}
+
 void MusicReader::read_file()
 {
     HRESULT hr = S_OK;
@@ -88,19 +109,24 @@ void MusicReader::read_file()
     {
         source_reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, NULL, media_type);
         sample_rate_ = MFGetAttributeUINT32(media_type, MF_MT_AUDIO_SAMPLES_PER_SECOND, 0);
+        media_type->GetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, &bit_depth_);
+        media_type->GetUINT32(MF_MT_AUDIO_NUM_CHANNELS, &num_channels_);
         PROPVARIANT duration;
         source_reader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE, MF_PD_DURATION, &duration);
-        // LONGLONG quadpart = duration.hVal.QuadPart;
-        sample_count = static_cast<DWORD>(duration.hVal.QuadPart * sample_rate_ / 10'000'000);
+        length_ = duration.hVal.QuadPart; // 100 ns 단위로 재생 시간 계산 (1,000,000,000 ns = 1 s, 1,000,000 ns = 1 ms)
+        sample_count = static_cast<DWORD>(length_ * sample_rate_ / 10'000'000);
     }
 
     // printf("SAMPLE SIZE : %lld\n", sample_count);
 
-    data_ = new float[sample_count]{0.f};
+    data_ = new double[sample_count]{0.f};
     data_len_ = 0;
+    time_term_ = 0;
+    LONGLONG bef_ts = 0;
     // Source에서 샘플 읽기
     while (true)
     {
+        
         IMFSample* sample;
         DWORD streamFlags;
         MFTIME timestamp;
@@ -121,13 +147,23 @@ void MusicReader::read_file()
         sample->ConvertToContiguousBuffer(&media_buffer);
         media_buffer->Lock(&real_buffer, &buffer_max, &buffer_length);
 
+        // 샘플 간격 설정
+        if(time_term_ == 0 && bef_ts > 0)
+            time_term_ = timestamp - bef_ts;
+        bef_ts = timestamp;
+        
         DWORD idx = 0;
         while(data_len_ < sample_count && idx < buffer_length)
-            data_[data_len_++] = static_cast<float>(combine_int16(real_buffer, &idx)) / static_cast<float>(SHRT_MAX) - 1;
+        {
+            double audio_data = combine_audio_data(real_buffer, &idx);
+            normalize(&audio_data);
+            data_[data_len_++] = audio_data;
+        }
     }
+    printf("End Parse");
 }
 
-void MusicReader::play_music_internal(void (*callback)(float** array, int len))
+void MusicReader::play_music()
 {
     HRESULT hr = MFStartup(MF_VERSION);
     check(hr, L"MF Initiate Exception");
@@ -164,10 +200,9 @@ void MusicReader::play_music_internal(void (*callback)(float** array, int len))
     writer->SetInputMediaType(0, input_type, nullptr);
 
     writer->BeginWriting();
-    int now_idx = 85;
-    int* shape = new int[2];
-    LONGLONG bef_ts = 0;
-    output(&shape);
+    UINT32* shape = new UINT32[2];
+    output(&shape, nullptr, nullptr);
+    
     // Source에서 샘플 읽기
     while (true)
     {
@@ -192,13 +227,8 @@ void MusicReader::play_music_internal(void (*callback)(float** array, int len))
         if (!sample) 
             continue;
         
-        if(now_idx < shape[0])
-            callback(&result_[now_idx++], shape[1]);
-        std::this_thread::sleep_for(std::chrono::milliseconds((timestamp-bef_ts) / 10'000)*0.9);
-        
         // Stream에 Sample을 입력한다. (재생)
         writer->WriteSample(0, sample);
-        bef_ts = timestamp;
     }
     writer->Finalize();
 }
@@ -212,12 +242,15 @@ void MusicReader::stft()
     out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * WINDOW_SIZE);
     plan = fftw_plan_dft_1d(WINDOW_SIZE, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
-    result_ = new float*[(data_len_ - WINDOW_SIZE) / HOP_SIZE + 5];
+    result_ = new double*[(data_len_ - WINDOW_SIZE) / HOP_SIZE + 5];
+    num_chunks_ = 0;
     float hamming[WINDOW_SIZE];
     for(int i = 0 ; i < WINDOW_SIZE ; i++)
         hamming[i] = 0.54f - 0.46f * cos(2 * 3.141592 * (i / ((WINDOW_SIZE - 1) * 1.0)));
-    int num_chunks = 0, chunk_pos = 0;
+    int chunk_pos = 0;
     bool bIsBreak = false;
+
+    double min_db = 9999, max_db = -9999;
 
     while(chunk_pos < data_len_ && !bIsBreak)
     {
@@ -241,17 +274,21 @@ void MusicReader::stft()
         fftw_execute(plan);
 
         // Apply
-        float* chunks = new float[WINDOW_SIZE / 2];
+        double* chunks = new double[WINDOW_SIZE / 2];
         for(int i = 0 ; i < WINDOW_SIZE/2 ; i++)
-            chunks[i] = 5 * (log10(max(AMIN, out[i][0] * out[i][0])) - log10(AMIN));
-        result_[num_chunks] = chunks;
+        {
+            double magnitude = sqrt(out[i][0] * out[i][0] + out[i][1] * out[i][1]);
+            chunks[i] = 20 * log10(magnitude + AMIN);
+            min_db = min(min_db, chunks[i]);
+            max_db = max(max_db, chunks[i]);
+        }
+        result_[num_chunks_++] = chunks;
 
         // Next
         chunk_pos += HOP_SIZE;
-        ++num_chunks;
     }
 
-    printf("NUM CHUNKS : %d\n", num_chunks);
+    printf("NUM CHUNKS : %d\tMAX dB : %.2lf\tMIN dB : %2.lf\n", num_chunks_, max_db, min_db);
 
     // Clean up FFTW resources
     fftw_destroy_plan(plan);
@@ -259,9 +296,19 @@ void MusicReader::stft()
     fftw_free(out);
 }
 
-result MusicReader::output(int** length)
+result MusicReader::output(UINT32** length, LONGLONG* timestamp, LONGLONG* time_length)
 {
-    (*length)[0] = (static_cast<long long>(data_len_) - WINDOW_SIZE) / HOP_SIZE + 5;
-    (*length)[1] = WINDOW_SIZE / 2;
+    if(length != nullptr)
+    {
+        (*length)[0] = num_chunks_;
+        (*length)[1] = WINDOW_SIZE / 2;
+    }
+    
+    if(timestamp != nullptr)
+        *timestamp = time_term_;
+    
+    if(time_length != nullptr)
+        *time_length = length_;
+    
     return result_;
 }

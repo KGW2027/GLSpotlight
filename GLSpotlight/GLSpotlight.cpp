@@ -7,7 +7,6 @@
 GLSCircle circular;
 MusicReader music_reader;
 
-
 void init()
 {
     circular = GLSCircle();
@@ -20,16 +19,20 @@ void display();
 /*
  * TODO - dB 데이터가 제대로 적용되지 않은 것으로 보임.
  * 이에 대해, STFT쪽이나 music parsing 쪽에서 재점검필요.
+ * test  - 18988 / 3분 21초 (201초)
+ * test2 - 28040 / 4분 59초 (299초)
+ * test3 - 12033 / 2분 19초 (140초)
+ * test4 - 25423 / 4분 31초 (271초)
  */
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitWindowSize(1280, 720);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutCreateWindow("GLSpotlight - β");
+    glutCreateWindow("GLSpotlight - Beta");
     
     init();
-    std::thread musicThreadObj(initMusic);
+    initMusic();
     
     glutDisplayFunc(display);
     glutTimerFunc(50, redisplay, 0);
@@ -55,30 +58,15 @@ void redisplay(int v)
 
 #pragma region Music_Management
 
-
-void callback(float** array, int window)
-{
-    float* circle_weight = new float[CIRCULAR_PRECISION]{0.0f};
-    float fmax = FLT_MIN;
-    int range = static_cast<int>(ceil(static_cast<float>(window) / static_cast<float>(CIRCULAR_PRECISION)));
-    
-    for(int i = 0 ; i < window ; i++)
-    {
-        circle_weight[i/range] += (*array)[i];
-        fmax = std::max(fmax, circle_weight[i/range]);
-    }
-    
-    for(int i = 0 ; i < CIRCULAR_PRECISION ; i++)
-        circle_weight[i] = static_cast<float>(pow(circle_weight[i] / fmax, 3));
-    
-    circular.set_radius(circle_weight);
-}
-
 void initMusic()
 {
-    const wchar_t* filename = L"../test2.wav";
+    const wchar_t* filename = L"../test4.wav";
     music_reader = MusicReader(filename);
-    music_reader.play_music(callback);
+    circular.set_music_reader(&music_reader);
+    std::thread render_thread(&GLSCircle::play, &circular);
+    std::thread music_thread(&MusicReader::play_music, &music_reader);
+    render_thread.detach();
+    music_thread.detach();
 }
 
 #pragma endregion

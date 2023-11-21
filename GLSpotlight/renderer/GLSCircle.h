@@ -4,27 +4,31 @@
 #include <ctime>
 
 #include "GLSRenderObject.h"
+#include "../music/MusicReader.h"
 
 #define CIRCULAR_PRECISION 360
 
-typedef float* circle_range;
+typedef double* circle_range;
 
 class GLSCircle : GLSRenderObject
 {
-     circle_range radius_data;
-     screen_pos circle_center;
-     float max_radius;
-     bool locked;
+     double**       freq_info_;
+     circle_range   radius_data_;
+     screen_pos     circle_center_;
+     float          max_radius_;
+     float          avg_db_;
+     MusicReader*   music_reader_;
+     UINT32         play_idx_;
 
      void get_point_pos(float theta, float radius, screen_pos* pos);
 
     void set_hue_based_color(int idx);
      
 public:
-     GLSCircle() : max_radius(200.f), locked(false)
+     GLSCircle() : max_radius_(200.f)
      {
-         radius_data = new float[CIRCULAR_PRECISION]{max_radius};
-         circle_center = glm::vec4(1280/2, 720/2, 0, 0);
+         radius_data_ = new double[CIRCULAR_PRECISION]{max_radius_};
+         circle_center_ = glm::vec4(1280/2, 720/2, 0, 0);
          windowsize = new int[2];
          srand(time(NULL));
      }
@@ -33,5 +37,12 @@ public:
 
     void set_random_radius();
 
-    void set_radius(float* radiuss);
+    void set_radius(double* radiuss, UINT32* window_size);
+
+    void play();
+
+    void set_music_reader(MusicReader* reader)
+    {
+        music_reader_ = reader;
+    }
 };
