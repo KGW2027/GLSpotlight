@@ -3,6 +3,8 @@
 #include <mfreadwrite.h>
 #include <thread>
 
+#include "ParseLogger.h"
+
 // Audio Play : https://stackoverflow.com/questions/65412545/how-to-increase-mp3-decoding-quality-media-foundation
 
 MusicReader::MusicReader(const wchar_t* path) : is_valid_(false)
@@ -17,46 +19,6 @@ MusicReader::MusicReader(const wchar_t* path) : is_valid_(false)
 
     // STFT DATA
     stft();
-}
-
-double MusicReader::combine_float64(BYTE* array, DWORD* idx)
-{
-    uint32_t combine = 0;
-    for(int shift = 64-8 ; shift >= 0 ; shift -= 8)
-        combine |= static_cast<uint32_t>(array[(*idx)++]) << shift;
-    float result;
-    std::memcpy(&result, &combine, sizeof(float));
-    return result;
-}
-
-float MusicReader::combine_float32(BYTE* array, DWORD* idx)
-{
-    uint32_t combine = 0;
-    for(int shift = 32-8 ; shift >= 0 ; shift -= 8)
-        combine |= static_cast<uint32_t>(array[(*idx)++]) << shift;
-    float result;
-    std::memcpy(&result, &combine, sizeof(float));
-    return result;
-}
-
-DWORD MusicReader::combine_int32(BYTE* array, DWORD* idx)
-{
-    uint32_t combine = 0;
-    for(int shift = 32-8 ; shift >= 0 ; shift -= 8)
-        combine |= static_cast<uint32_t>(array[(*idx)++]) << shift;
-    DWORD result;
-    std::memcpy(&result, &combine, sizeof(DWORD));
-    return result;
-}
-
-WORD MusicReader::combine_int16(BYTE* array, DWORD* idx)
-{
-    uint32_t combine = 0;
-    for(int shift = 16-8 ; shift >= 0 ; shift -= 8)
-        combine |= static_cast<uint16_t>(array[(*idx)++]) << shift;
-    WORD result;
-    std::memcpy(&result, &combine, sizeof(WORD));
-    return result;
 }
 
 double MusicReader::combine_audio_data(BYTE* array, DWORD* idx)
@@ -77,7 +39,7 @@ double MusicReader::combine_audio_data(BYTE* array, DWORD* idx)
 void MusicReader::normalize(double* data)
 {
     UINT64 num = 1;
-    for(int bits = bit_depth_ ; bits > 0 ; bits--)
+    for(int bits = bit_depth_-1 ; bits > 0 ; bits--)
     {
         num <<= 1;
         num++;
@@ -123,6 +85,7 @@ void MusicReader::read_file()
     data_len_ = 0;
     time_term_ = 0;
     LONGLONG bef_ts = 0;
+    LONGLONG over = 0;
     // Source에서 샘플 읽기
     while (true)
     {
@@ -158,9 +121,15 @@ void MusicReader::read_file()
             double audio_data = combine_audio_data(real_buffer, &idx);
             normalize(&audio_data);
             data_[data_len_++] = audio_data;
+            ParseLogger::write_str(std::to_string(data_len_-1) + " : " + std::to_string(audio_data) + "\n");
+
+            if(data_len_ % (sample_count / 10) == 0) printf("Progress... %lu\n", data_len_);
         }
+
+        over += buffer_length - idx;
     }
-    printf("End Parse");
+    printf("Over : %lld\n", over);
+    // printf("End Parse");
 }
 
 void MusicReader::play_music()
@@ -230,6 +199,7 @@ void MusicReader::play_music()
         // Stream에 Sample을 입력한다. (재생)
         writer->WriteSample(0, sample);
     }
+    printf("End Music Play");
     writer->Finalize();
 }
 

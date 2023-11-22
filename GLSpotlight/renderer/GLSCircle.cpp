@@ -72,8 +72,8 @@ void GLSCircle::render()
     
     glBegin(GL_LINES);
     glColor3f(1, 1, 1);
-    glVertex2f(-1.0, avg_db_);
-    glVertex2f(1.0, avg_db_);
+    glVertex2f(-.9, avg_db_);
+    glVertex2f(.9, avg_db_);
     glEnd();
 
     glRasterPos2f(.8, avg_db_+.05);

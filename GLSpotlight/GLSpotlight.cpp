@@ -3,6 +3,7 @@
 
 #include "renderer/GLSCircle.h"
 #include "music/MusicReader.h"
+#include "music/ParseLogger.h"
 
 GLSCircle circular;
 MusicReader music_reader;
@@ -30,7 +31,8 @@ int main(int argc, char** argv) {
     glutInitWindowSize(1280, 720);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutCreateWindow("GLSpotlight - Beta");
-    
+
+    ParseLogger::getInstance();
     init();
     initMusic();
     
@@ -60,7 +62,7 @@ void redisplay(int v)
 
 void initMusic()
 {
-    const wchar_t* filename = L"../test2.wav";
+    const wchar_t* filename = L"../test4.wav";
     music_reader = MusicReader(filename);
     circular.set_music_reader(&music_reader);
     std::thread render_thread(&GLSCircle::play, &circular);

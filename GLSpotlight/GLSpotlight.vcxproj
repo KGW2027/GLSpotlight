@@ -234,6 +234,7 @@
       <SDLCheck>true</SDLCheck>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="music\ParseLogger.cpp" />
     <ClCompile Include="renderer\GLSCircle.cpp" />
     <ClCompile Include="renderer\GLSRenderObject.cpp" />
   </ItemGroup>
@@ -242,6 +243,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="music\MusicReader.h" />
+    <ClInclude Include="music\ParseLogger.h" />
     <ClInclude Include="renderer\GLSCircle.h" />
     <ClInclude Include="renderer\GLSRenderObject.h" />
   </ItemGroup>

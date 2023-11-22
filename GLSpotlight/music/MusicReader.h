@@ -54,11 +54,7 @@ class MusicReader
         const DWORD file_attributes = GetFileAttributes(filePath);
         return file_attributes != INVALID_FILE_ATTRIBUTES && !(file_attributes & FILE_ATTRIBUTE_DIRECTORY);
     }
-
-    double combine_float64(BYTE* array, DWORD* idx);
-    float combine_float32(BYTE* array, DWORD* idx);
-    DWORD combine_int32(BYTE* array, DWORD* idx);
-    WORD combine_int16(BYTE* array, DWORD* idx);
+    
     double combine_audio_data(BYTE* array, DWORD* idx);
     void normalize(double* data);
 
