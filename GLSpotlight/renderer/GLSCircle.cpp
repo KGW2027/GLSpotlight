@@ -1,7 +1,6 @@
 ﻿#include "GLSCircle.h"
 
 #include <windows.h>
-#include <stdio.h>
 #include <string>
 #include <thread>
 #include <gl/freeglut.h>
@@ -84,9 +83,15 @@ void GLSCircle::render()
     glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'd');
     glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'B');
 
-    glColor3f(1.f, .0, .0);
+    glColor3f(1., .0, .0);
     glRasterPos2f(.0, -.5);
     std::string tstr = std::to_string(play_idx_);
+    for(int idx = 0 ; idx < tstr.length() ; idx++)
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, tstr.at(idx));
+    
+    glColor3f(.7, .3, .2);
+    glRasterPos2f(.0, -.6);
+    tstr = std::to_string(static_cast<float>(play_time_) / 1'000'000'000.f);
     for(int idx = 0 ; idx < tstr.length() ; idx++)
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, tstr.at(idx));
     
@@ -124,10 +129,12 @@ void GLSCircle::play()
     UINT32 *shape = new UINT32[2];
     play_idx_ = 0;
     freq_info_ = music_reader_->output(&shape, &term, &length);
-    printf("Shape (%d, %d)\n", shape[0], shape[1]);
+    
+    auto start_time = std::chrono::high_resolution_clock::now();
+    auto delay = std::chrono::nanoseconds(static_cast<UINT64>(length / shape[0]) * 100);
     do
     {
         set_radius(freq_info_[play_idx_], &shape[1]);
-        std::this_thread::sleep_for(std::chrono::nanoseconds(length * 100 / shape[0]));
+        std::this_thread::sleep_until(start_time += delay);
     }while(++play_idx_ < shape[0]);
 }

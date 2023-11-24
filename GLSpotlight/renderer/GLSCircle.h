@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <chrono>
 #include <cstdlib>
 #include <ctime>
 
@@ -19,6 +20,7 @@ class GLSCircle : GLSRenderObject
      float          avg_db_;
      MusicReader*   music_reader_;
      UINT32         play_idx_;
+     UINT64         play_time_;
 
      void get_point_pos(float theta, float radius, screen_pos* pos);
 
