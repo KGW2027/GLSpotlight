@@ -91,7 +91,7 @@ void GLSCircle::render()
     
     glColor3f(.7, .3, .2);
     glRasterPos2f(.0, -.6);
-    tstr = std::to_string(static_cast<float>(play_time_) / 1'000'000'000.f);
+    tstr = std::to_string(static_cast<double>(play_time_) / 1'000.);
     for(int idx = 0 ; idx < tstr.length() ; idx++)
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, tstr.at(idx));
     
@@ -131,10 +131,12 @@ void GLSCircle::play()
     freq_info_ = music_reader_->output(&shape, &term, &length);
     
     auto start_time = std::chrono::high_resolution_clock::now();
+    auto until_time = std::chrono::high_resolution_clock::now();
     auto delay = std::chrono::nanoseconds(static_cast<UINT64>(length / shape[0]) * 100);
     do
     {
         set_radius(freq_info_[play_idx_], &shape[1]);
-        std::this_thread::sleep_until(start_time += delay);
+        std::this_thread::sleep_until(until_time += delay);
+        play_time_ = std::chrono::duration_cast<std::chrono::milliseconds>(until_time - start_time).count();
     }while(++play_idx_ < shape[0]);
 }
