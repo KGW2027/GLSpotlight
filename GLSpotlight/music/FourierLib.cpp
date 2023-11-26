@@ -23,6 +23,48 @@ void FourierLib::w_hamming(double* out, uint window_length)
         out[idx] = 0.54 - 0.46 * std::cos(2 * PI * idx / (window_length - 1));
 }
 
+dB_Out FourierLib::amp_to_dB(dB_In params)
+{
+    double  **out   = new double*[params.frame_count];
+    double  ref     = -999, amin    = 1e-10,    norm_max    = -999;
+
+    // Get Maximum Value (Ref)
+    for(uint idx = 0 ; idx < params.frame_count ; idx++)
+    {
+        out[idx]    = new double[params.window_size];
+        for(uint widx = 0 ; widx < params.window_size ; widx++)
+        {
+            if(params.in[idx][widx] < 0) params.in[idx][widx] = 0;
+            
+            ref            = max(ref, params.in[idx][widx]);
+            out[idx][widx] = 10 * log10(max(amin, pow(params.in[idx][widx], 2)));
+        }
+    }
+
+    // Normalized
+    ref     = 10. * log10(max(amin, pow(ref, 2)));
+    
+    for(uint idx = 0 ; idx < params.frame_count ; idx++)
+    {
+        for(uint widx = 0 ; widx < params.window_size ; widx++)
+        {
+            out[idx][widx] -= ref;
+            norm_max = max(norm_max, out[idx][widx]);
+        }
+    }
+
+    // Low Cut
+    for(uint idx = 0 ; idx < params.frame_count ; idx++)
+        for(uint widx = 0 ; widx < params.window_size ; widx++)
+            out[idx][widx]  = max(out[idx][widx], norm_max - params.top_dB);
+
+    // Return
+    dB_Out result;
+    result.out = out;
+    result.size = new uint[]{params.window_size, params.frame_count};
+    return result;
+}
+
 double* FourierLib::padding(uint pad_l, uint pad_r, double* arr, uint offset, uint len)
 {
     double* pad = new double[pad_l + pad_r + len];
