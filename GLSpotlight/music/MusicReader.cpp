@@ -1,24 +1,38 @@
 ﻿#include "MusicReader.h"
 
+#include <assert.h>
 #include <mfreadwrite.h>
 #include <thread>
+#include <vector>
+#include <fftw3.h>
 
-#include "ParseLogger.h"
+#include "FourierLib.h"
 
 // Audio Play : https://stackoverflow.com/questions/65412545/how-to-increase-mp3-decoding-quality-media-foundation
 
-MusicReader::MusicReader(const wchar_t* path) : is_valid_(false)
+MusicReader::MusicReader(const wchar_t* path) : data_(nullptr), data_len_(0), is_valid_(false)
 {
     path_ = path;
-    if(!is_file_exists(path_)) return;
-    
+    if (!is_file_exists(path_)) return;
+
     is_valid_ = true;
 
     // Read Audio Data
     read_file();
 
+    // Experiment - Pycharm Integration
+    
+    
     // STFT DATA
-    stft();
+    STFT_Setting stft;
+    stft.hop_len = HOP_SIZE;
+    stft.win_len = WINDOW_SIZE;
+    stft.in = data_;
+    stft.in_len = data_len_;
+
+    STFT_Out out = FourierLib::stft(stft);
+    result_ = out.out;
+    num_chunks_ = out.size[1];
 }
 
 double MusicReader::combine_audio_data(BYTE* array, DWORD* idx)
@@ -121,15 +135,13 @@ void MusicReader::read_file()
             double audio_data = combine_audio_data(real_buffer, &idx);
             normalize(&audio_data);
             data_[data_len_++] = audio_data;
-            ParseLogger::write_str(std::to_string(data_len_-1) + " : " + std::to_string(audio_data) + "\n");
-
-            if(data_len_ % (sample_count / 10) == 0) printf("Progress... %lu\n", data_len_);
+            // ParseLogger::write_str(std::to_string(data_len_-1) + " : " + std::to_string(audio_data) + "\n");
+            //
+            // if(data_len_ % (sample_count / 10) == 0) printf("Progress... %lu\n", data_len_);
         }
 
         over += buffer_length - idx;
     }
-    printf("Over : %lld\n", over);
-    // printf("End Parse");
 }
 
 void MusicReader::play_music()
@@ -140,7 +152,6 @@ void MusicReader::play_music()
     IMFSourceReader* source_reader = nullptr;
     hr = MFCreateSourceReaderFromURL(path_, nullptr, &source_reader);
     check(hr, L"Create Source Reader Exception");
-
     source_reader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS, false);
     source_reader->SetStreamSelection(MF_SOURCE_READER_FIRST_AUDIO_STREAM, true);
     
@@ -153,7 +164,7 @@ void MusicReader::play_music()
     media_sink->GetStreamSinkByIndex(0, &stream_sink);
     stream_sink->GetMediaTypeHandler(&typeHandler);
     typeHandler->GetMediaTypeCount(&dwCount);
-
+    
     // Stream_Sink가 Input_Type 미디어 타입을 지원하는지 검사
     for (INT i = 0; i < static_cast<int>(dwCount); i++)
     {
@@ -199,71 +210,7 @@ void MusicReader::play_music()
         // Stream에 Sample을 입력한다. (재생)
         writer->WriteSample(0, sample);
     }
-    printf("End Music Play");
     writer->Finalize();
-}
-
-void MusicReader::stft()
-{
-    // Initialize FFTW plan and allocate memory
-    fftw_plan plan;
-    fftw_complex *in, *out;
-    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * WINDOW_SIZE);
-    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * WINDOW_SIZE);
-    plan = fftw_plan_dft_1d(WINDOW_SIZE, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
-
-    result_ = new double*[(data_len_ - WINDOW_SIZE) / HOP_SIZE + 5];
-    num_chunks_ = 0;
-    float hamming[WINDOW_SIZE];
-    for(int i = 0 ; i < WINDOW_SIZE ; i++)
-        hamming[i] = 0.54f - 0.46f * cos(2 * 3.141592 * (i / ((WINDOW_SIZE - 1) * 1.0)));
-    int chunk_pos = 0;
-    bool bIsBreak = false;
-
-    double min_db = 9999, max_db = -9999;
-
-    while(chunk_pos < data_len_ && !bIsBreak)
-    {
-        // Windoing
-        for(int i = 0 ; i < WINDOW_SIZE ; i++)
-        {
-            int read = chunk_pos + i;
-            in[i][0] = 0.0;
-            in[i][1] = 0.0;
-            
-            if(read < data_len_)
-            {
-                in[i][0] = data_[read] * hamming[i];
-                continue;
-            }
-            
-            bIsBreak = true;
-        }
-
-        // FFT
-        fftw_execute(plan);
-
-        // Apply
-        double* chunks = new double[WINDOW_SIZE / 2];
-        for(int i = 0 ; i < WINDOW_SIZE/2 ; i++)
-        {
-            double magnitude = sqrt(out[i][0] * out[i][0] + out[i][1] * out[i][1]);
-            chunks[i] = 20 * log10(magnitude + AMIN);
-            min_db = min(min_db, chunks[i]);
-            max_db = max(max_db, chunks[i]);
-        }
-        result_[num_chunks_++] = chunks;
-
-        // Next
-        chunk_pos += HOP_SIZE;
-    }
-
-    printf("NUM CHUNKS : %d\tMAX dB : %.2lf\tMIN dB : %2.lf\n", num_chunks_, max_db, min_db);
-
-    // Clean up FFTW resources
-    fftw_destroy_plan(plan);
-    fftw_free(in);
-    fftw_free(out);
 }
 
 result MusicReader::output(UINT32** length, LONGLONG* timestamp, LONGLONG* time_length)

@@ -2,19 +2,12 @@
 
 #include <functional>
 #include <iostream>
-#include <vector>
 #include <windows.h>
-
 #include <mfapi.h>
 #include <mfidl.h>
+#include <complex>
 
-#include <fftw3.h>
-
-#pragma comment(lib, "mfplat")
-#pragma comment(lib, "mfuuid")
-#pragma comment(lib, "mfreadwrite")
-#pragma comment(lib, "mf")
-#pragma comment(lib, "ole32")
+#include "FourierLib.h"
 
 typedef double* read_data;
 typedef double** result;
@@ -57,15 +50,8 @@ class MusicReader
     
     double combine_audio_data(BYTE* array, DWORD* idx);
     void normalize(double* data);
-
-    bool check_header(BYTE one, BYTE two)
-    {
-        return one == 0xFF && ((two & 0xF0) == 0xF0 || (two & 0xE0) == 0xE0);
-    }
     
     void read_file();
-
-    void stft();
 public:
 
     MusicReader(){}
