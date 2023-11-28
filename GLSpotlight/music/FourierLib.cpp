@@ -67,9 +67,11 @@ dB_Out FourierLib::amp_to_dB(dB_In params)
 
 double* FourierLib::padding(uint pad_l, uint pad_r, double* arr, uint offset, uint len)
 {
-    double* pad = new double[pad_l + pad_r + len];
-    for(uint idx = 0 ; idx < len ; idx++)
-        pad[pad_l + idx] = arr[offset + idx];
+    uint tlen = pad_l + pad_r + len;
+    double* pad = new double[tlen];
+    for(uint idx = 0 ; idx < tlen ; idx++)
+        pad[idx] = pad_l <= idx && idx < pad_l + len? arr[offset+idx-pad_l] : 0;
+    
     return pad;
 }
 
@@ -87,7 +89,9 @@ double** FourierLib::frame(double* arr, uint len, uint win_len, uint hop_len, ui
         uint offset = hop_len * idx;
 
         for(uint sidx = 0 ; sidx < win_len ; sidx++)
+        {
             frames[idx][sidx] = arr[offset + sidx];
+        }
     }
 
     shape[0] = win_len;
@@ -115,7 +119,7 @@ STFT_Out FourierLib::stft(STFT_Setting params)
     uint   *post_frame_size = (uint*) malloc(sizeof(uint) * 2);
     pad_len     = (forward_k - 1) * params.hop_len - params.win_len / 2 + params.win_len + 1;
     y_pre       = padding(pad_l, pad_r, params.in, 0, pad_len);
-    y_frame_pre = frame(y_pre, pad_l + pad_r + params.win_len, params.win_len, params.hop_len, pre_frame_size);
+    y_frame_pre = frame(y_pre, pad_l + pad_r + pad_len, params.win_len, params.hop_len, pre_frame_size);
     
     if (backward_k * params.hop_len - params.win_len / 2 + params.win_len <= params.in_len * params.win_len / 2)
     {
@@ -123,7 +127,7 @@ STFT_Out FourierLib::stft(STFT_Setting params)
         pad_r        = params.win_len / 2;
         offset       = backward_k * params.hop_len - params.win_len / 2;
         y_post       = padding(pad_l, pad_r, params.in, offset, params.in_len - offset);
-        y_frame_post = frame(y_post, pad_l+pad_r+params.win_len, params.win_len, params.hop_len, post_frame_size);
+        y_frame_post = frame(y_post, pad_l + pad_r + params.in_len - offset, params.win_len, params.hop_len, post_frame_size);
     }
     else
     {
@@ -139,6 +143,7 @@ STFT_Out FourierLib::stft(STFT_Setting params)
     double       **audio_frames   = frame(params.in, params.in_len, params.win_len, params.hop_len, out_frame_size);
     double       *in              = (double*)       fftw_malloc(sizeof(double) * params.win_len);
     fftw_complex *out             = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * params.win_len);
+
     out_frame_size[0] = 1 + params.win_len / 2;
     out_frame_size[1] += extra;
 
@@ -156,7 +161,7 @@ STFT_Out FourierLib::stft(STFT_Setting params)
             in[in_idx] = fft_window[in_idx] * y_frame_pre[frame_idx][in_idx];
         
         fftw_execute(plan);
-
+    
         for(uint in_idx = 0 ; in_idx < out_frame_size[0] ; in_idx++)
             result[frame_idx][in_idx] = sqrt(out[in_idx][0] * out[in_idx][0] + out[in_idx][1] * out[in_idx][1]);
     }
@@ -185,15 +190,16 @@ STFT_Out FourierLib::stft(STFT_Setting params)
             in[in_idx] = fft_window[in_idx] * audio_frames[frame_idx][in_idx];
 
         fftw_execute(plan);
-
         for(uint in_idx = 0 ; in_idx < out_frame_size[0] ; in_idx++)
+        {
             result[pre_frame_size[1] + frame_idx][in_idx] = sqrt(out[in_idx][0] * out[in_idx][0] + out[in_idx][1] * out[in_idx][1]);
+        }
     }
 
     STFT_Out output;
     output.out = result;
     output.size = new uint[]{out_frame_size[0], out_frame_size[1]};
-
+    
     // Memory Clean
     fftw_destroy_plan(plan);
     fftw_free(in);
