@@ -5,8 +5,13 @@
 #include <thread>
 #include <vector>
 #include <fftw3.h>
+#include <fstream>
 
 #include "FourierLib.h"
+#include "ParseLogger.h"
+
+#define P_Integ_L 20854
+#define P_Integ_S 1025
 
 // Audio Play : https://stackoverflow.com/questions/65412545/how-to-increase-mp3-decoding-quality-media-foundation
 
@@ -19,20 +24,117 @@ MusicReader::MusicReader(const wchar_t* path) : data_(nullptr), data_len_(0), is
 
     // Read Audio Data
     read_file();
+    
+    // Experiment - Pycharm STFT Result export Integration [ wav5 - (20854, 1025), wav4 - (25423, 1025)]
+    const char    *file_path   = "F:/P_Programming/P_python/economyPract/export-stft.txt";
+          double  **parse_arr  = new double*[0];
+    
+    FILE*   file;
+    if(!fopen_s(&file, file_path, "r"))
+        parse_arr = experiment_read_line(file);
+    
+    dB_In db_cvt;
+    db_cvt.frame_count = P_Integ_L;
+    db_cvt.window_size = P_Integ_S;
+    db_cvt.top_dB      = 80.;
+    db_cvt.in          = parse_arr;
+    dB_Out db_out      = FourierLib::amp_to_dB(db_cvt);
+    result_     = db_out.out;
+    num_chunks_ = db_out.size[1];
 
-    // Experiment - Pycharm Integration
+    // Experiment - Pycharm Music Parse Integration
+    // const char  *file_path  = "F:/P_Programming/P_python/economyPract/export-wav4.txt";
+    // uint        parse_len   = 0;
+    // double      *data       = ParseLogger::read_audio_export(file_path, &parse_len);
     
-    
+    //
     // STFT DATA
-    STFT_Setting stft;
-    stft.hop_len = HOP_SIZE;
-    stft.win_len = WINDOW_SIZE;
-    stft.in = data_;
-    stft.in_len = data_len_;
+    // STFT_Setting stft;
+    // stft.hop_len = HOP_SIZE;
+    // stft.win_len = WINDOW_SIZE;
+    // stft.in = data_;
+    // stft.in_len = data_len_;
+    // STFT_Out out = FourierLib::stft(stft);
+    //
+    // dB_In db_cvt;
+    // db_cvt.frame_count = out.size[1];
+    // db_cvt.window_size = out.size[0];
+    // db_cvt.top_dB = 80.;
+    // db_cvt.in = out.out;
+    // dB_Out db_out = FourierLib::amp_to_dB(db_cvt);
+    // result_     = db_out.out;
+    // num_chunks_ = db_out.size[1];
 
-    STFT_Out out = FourierLib::stft(stft);
-    result_ = out.out;
-    num_chunks_ = out.size[1];
+    // dB Parse : -80, -57.2536
+    // norm parse : -80, -41.6194
+    // de-norm parse : -80, -41.6194
+    // my data : -39.2190, -39.9385
+    // norm my data : -39.2190, -39.9385
+}
+
+double** MusicReader::experiment_read_line(FILE* file)
+{
+    size_t                      buffer_size = (1<<12)+1;
+    char                        *buffer     = new char[buffer_size];
+    size_t                      length;
+
+    double                      read_cache  = 0.0;
+    uint                        integ_key   = 0;
+    uint                        inner_key   = 0;
+    uint                        max_inner   = 0;
+    double                      **integrated= new double*[P_Integ_L];
+    bool                        floating    = false;
+    int                         floating_i  = 0;
+    
+    for(uint idx = 0 ; idx < P_Integ_L ; idx++ )
+        integrated[idx] = new double[P_Integ_S];
+    
+    while((length = fread_s(buffer, buffer_size, sizeof(char), (buffer_size - 1) / sizeof(char), file)) > 0)
+    {
+        for(uint idx = 0 ; idx < length ; idx++)
+        {
+            char    c   = buffer[idx];
+            
+            if(c == '\r') continue;
+
+            if(c == ',' || c == '\0' || c == '\n')
+            {
+                integrated[inner_key++][integ_key] = read_cache;
+                read_cache = 0.0;
+                floating = false;
+
+                if(c != ',')
+                {
+                    integ_key++;
+                    if(c == '\0') break;
+                    if(integ_key % 102 == 0) printf("%d / %d\n", integ_key, 1025);
+                    max_inner = max(max_inner, inner_key);
+                    inner_key = 0;
+                }
+                continue;
+            }
+
+            if(c == '.')
+            {
+                floating = true;
+                floating_i = -1;
+                continue;
+            }
+
+            if(floating)
+            {
+                read_cache += (c & 0xF) * pow(10, floating_i--);
+            }
+            else
+            {
+                read_cache *= 10;
+                read_cache += c & 0xF;
+            }
+        }
+    }
+
+    printf("Shape : (%d, %d)\n", integ_key, max_inner);
+    return integrated;
 }
 
 double MusicReader::combine_audio_data(BYTE* array, DWORD* idx)
@@ -135,13 +237,24 @@ void MusicReader::read_file()
             double audio_data = combine_audio_data(real_buffer, &idx);
             normalize(&audio_data);
             data_[data_len_++] = audio_data;
-            // ParseLogger::write_str(std::to_string(data_len_-1) + " : " + std::to_string(audio_data) + "\n");
-            //
-            // if(data_len_ % (sample_count / 10) == 0) printf("Progress... %lu\n", data_len_);
         }
 
         over += buffer_length - idx;
     }
+}
+
+std::vector<std::string> MusicReader::split(std::string input, char delimiter)
+{
+    std::vector<std::string> answer;
+    std::stringstream ss(input);
+    std::string temp;
+ 
+    while (getline(ss, temp, delimiter)) {
+        answer.push_back(temp);
+    }
+ 
+    return answer;
+
 }
 
 void MusicReader::play_music()

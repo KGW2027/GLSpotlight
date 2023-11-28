@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GLSpotlight.cpp" />
+    <ClCompile Include="music\FourierLib.cpp" />
     <ClCompile Include="music\MusicReader.cpp">
       <AdditionalIncludeDirectories>F:\P_Programming\P_cpp\GLSpotlight\packages\fftw_339.3.3.9.202108273\build\native\..\..\lib\native\fftw-debug\include;F:\P_Programming\P_cpp\GLSpotlight\packages\glew.v140.1.12.0\build\native\../..//build/native/include/;F:\P_Programming\P_cpp\GLSpotlight\packages\glm.0.9.9.800\build\native\include/;F:\P_Programming\P_cpp\GLSpotlight\packages\freeglut.3.0.0.v140.1.0.2\build\\..\sources\;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_UNICODE;UNICODE;GLEW_STATIC;HAS_GLM;</PreprocessorDefinitions>
@@ -242,6 +243,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="music\FourierLib.h" />
     <ClInclude Include="music\MusicReader.h" />
     <ClInclude Include="music\ParseLogger.h" />
     <ClInclude Include="renderer\GLSCircle.h" />

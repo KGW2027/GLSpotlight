@@ -6,6 +6,7 @@
 #include <mfapi.h>
 #include <mfidl.h>
 #include <complex>
+#include <vector>
 
 #include "FourierLib.h"
 
@@ -30,6 +31,8 @@ class MusicReader
     UINT32      num_channels_;
     UINT32      num_chunks_;
     bool        is_valid_;
+
+    double** experiment_read_line(FILE* file);
     
         // HRESULT의 결과가 실패(<0)이면 오류 메세지 및 콜백 함수 실행
     void check(HRESULT result, const wchar_t* error_msg, void (*callback)() = {})
@@ -52,6 +55,9 @@ class MusicReader
     void normalize(double* data);
     
     void read_file();
+
+    // Debug
+    std::vector<std::string> split(std::string input, char delimiter);
 public:
 
     MusicReader(){}
