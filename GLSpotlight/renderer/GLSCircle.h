@@ -33,7 +33,6 @@ class GLSCircle : GLSRenderObject
     UINT64          play_time_;
     
     void get_point_pos(float theta, float radius, screen_pos* pos);
-    void set_hue_based_color(int idx);
      
 public:
     GLSCircle(int radius_size) : max_radius_(200.f)

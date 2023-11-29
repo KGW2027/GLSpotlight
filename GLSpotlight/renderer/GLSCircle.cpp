@@ -12,12 +12,9 @@
 #define M_E 2.7182818284590452354
 #define M_PI 3.14159265358979323846
 
-#define INTERP_ALPHA 0.02
 #define INTERP_RANGE 1
-#define NORMALIZER 20
 #define DECAY 0.9
 #define MIN_dB 80.0
-#define MUTE_THRESHOLD 10
 
 
 void GLSCircle::add_data(uint pos, double value)
@@ -32,8 +29,6 @@ void GLSCircle::draw_frame(double* data, UINT32* window_size)
     {
         if(is_muted(data[idx])) radius_data_[idx] *= DECAY;
         else add_data(idx, data[idx]);
-        
-        if(abs(radius_data_[idx]) < MUTE_THRESHOLD) radius_data_[idx] = 0;
     }
 }
 
@@ -48,22 +43,6 @@ void GLSCircle::get_point_pos(float theta, float radius, screen_pos* pos)
     glm::mat4 rot = rotate(glm::mat4(1), glm::radians(theta), glm::vec3(0, 0, 1));
     *pos = circle_center_ + dir_vec * rot;
     glut_pos_to_gl_pos(pos);
-}
-
-void GLSCircle::set_hue_based_color(int idx)
-{
-    int range;
-    float s, v, c, x, m, pr, pg, pb;
-    range = idx * (CIRCULAR_PRECISION/360.f) / 60.f;
-    s = v = 1.f; s -=.5f;
-    c = s*v;
-    x = c * (1.f - abs(range % 2 - 1));
-    m = v - c;
-
-    pr = range == 0 || range == 5 ? c : range == 1 || range == 4 ? x : 0;
-    pg = range == 0 || range == 3 ? x : range == 1 || range == 2 ? c : 0;
-    pb = range == 2 || range == 5 ? x : range == 3 || range == 4 ? c : 0;
-    glColor3f(pr+m, pg+m, pb+m);
 }
 
 void GLSCircle::render()
@@ -81,14 +60,13 @@ void GLSCircle::render()
     glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
-    glLineWidth(3.0);
+    glLineWidth(.5);
     glColor3f(182/255., 231/255., 255/255.);
     
     glBegin(GL_LINES);
     for(int i = 0 ; i < 1024 ; i++)
     {
         float shift = 1280.f * 0.05f + static_cast<float>(i);
-        if(abs(radius_data_[i]) < 3) continue;
         glm::vec4 pos(shift, 360-radius_data_[i]*-1.5, 0, 1);
         glut_pos_to_gl_pos(&pos);
         glVertex2f(pos[0], pos[1]);
