@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include <windows.h>
+#include <GL/gl.h>
 #include <glm/glm.hpp>
 
 typedef glm::vec3 vec3;
@@ -7,16 +9,18 @@ typedef short size2d[2];
 
 class StageObject
 {
+    
+protected:
     vec3 position_, rotate_, scale_;
     size2d window_size_;
     
     void update_window_size();
     void gl_pos_to_glut_pos(affine gl_pos);
     void glut_pos_to_gl_pos(affine glut_pos);
-    
-    virtual void pre_render() {}
-    virtual void rendering() {}
-    virtual void post_render() {}
+
+    virtual void pre_render();
+    virtual void rendering() {  }
+    virtual void post_render() { glPopMatrix(); }
 
 public:
     virtual ~StageObject() = default;

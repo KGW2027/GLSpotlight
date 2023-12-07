@@ -26,3 +26,13 @@ void StageObject::glut_pos_to_gl_pos(affine glut_pos)
     (*glut_pos)[0] = (*glut_pos)[0] * 2 / static_cast<float>(window_size_[0]) - 1;
     (*glut_pos)[1] = (static_cast<float>(window_size_[1]) - (*glut_pos)[1]) * 2.f / static_cast<float>(window_size_[1]) - 1;
 }
+
+void StageObject::pre_render()
+{
+    glPushMatrix();
+    glTranslatef(position_[0], position_[1], position_[2]);
+    glRotatef(rotate_[0], 1, 0, 0);
+    glRotatef(rotate_[1], 0, 1, 0);
+    glRotatef(rotate_[2], 0, 0, 1);
+    glScalef(scale_[0], scale_[1], scale_[2]);
+}

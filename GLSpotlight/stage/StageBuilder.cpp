@@ -12,11 +12,15 @@ std::vector<StageObject*> StageBuilder::render_objects_;
 void display()
 {
     assert(StageBuilder::s_builder != nullptr);
-
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
     for(StageObject* obj : StageBuilder::get_render_objects())
-    {
         obj->render();
-    }
+
+    glutSwapBuffers();
 }
 
 void interval(int v)
@@ -61,5 +65,14 @@ void StageBuilder::start()
     
 
     // OpenGL 액션 시작
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_LINE_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_POLYGON_SMOOTH);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    
     glutMainLoop();
 }

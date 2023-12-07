@@ -236,8 +236,9 @@
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="music\ParseLogger.cpp" />
-    <ClCompile Include="renderer\GLSCircle.cpp" />
-    <ClCompile Include="renderer\GLSRenderObject.cpp" />
+    <ClCompile Include="stage\objects\StageObject.cpp" />
+    <ClCompile Include="stage\objects\StageWaver.cpp" />
+    <ClCompile Include="stage\StageBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -246,8 +247,9 @@
     <ClInclude Include="music\FourierLib.h" />
     <ClInclude Include="music\MusicReader.h" />
     <ClInclude Include="music\ParseLogger.h" />
-    <ClInclude Include="renderer\GLSCircle.h" />
-    <ClInclude Include="renderer\GLSRenderObject.h" />
+    <ClInclude Include="stage\objects\StageObject.h" />
+    <ClInclude Include="stage\objects\StageWaver.h" />
+    <ClInclude Include="stage\StageBuilder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
