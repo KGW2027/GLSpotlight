@@ -35,7 +35,7 @@ void StageBuilder::init()
 
 StageBuilder::StageBuilder(int argc, char* argv[])
 {
-    
+    // OpenGL 초기화 
     glutInit(&argc, argv);
     glutInitWindowSize(1280, 720);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
@@ -50,10 +50,16 @@ StageBuilder::StageBuilder(int argc, char* argv[])
     
 }
 
+/**
+ * \brief 프로그램을 시작하는 함수
+ */
 void StageBuilder::start()
 {
-    waver->start();
+    // Spectrum Render 오브젝트 실행
     add_render_objects(waver);
+
     
+
+    // OpenGL 액션 시작
     glutMainLoop();
 }

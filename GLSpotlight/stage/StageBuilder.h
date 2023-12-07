@@ -24,5 +24,5 @@ public:
     void set_fps(unsigned int fps) { timer_tick = 1000 / fps; }
 
     static std::vector<StageObject*> get_render_objects() { return render_objects_; }
-    static void add_render_objects(StageObject* obj) { render_objects_.push_back(obj); }
+    static void add_render_objects(StageObject* obj) { obj->ready(); render_objects_.push_back(obj); }
 };

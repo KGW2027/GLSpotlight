@@ -12,7 +12,7 @@ StageWaver::StageWaver(const wchar_t* wav_path) : music_reader_(nullptr), wav_re
     wav_renderer_->set_music_reader(music_reader_);
 }
 
-void StageWaver::start()
+void StageWaver::ready()
 {
     // Play Spectrum Render
     assert(wav_renderer_ != nullptr);
