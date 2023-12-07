@@ -6,6 +6,7 @@
 #include <vector>
 #include <fftw3.h>
 #include <fstream>
+#include <fstream>
 
 #include "FourierLib.h"
 #include "ParseLogger.h"
@@ -154,12 +155,7 @@ double MusicReader::combine_audio_data(BYTE* array, DWORD* idx)
 
 void MusicReader::normalize(double* data)
 {
-    UINT64 num = 1;
-    for(int bits = bit_depth_-1 ; bits > 0 ; bits--)
-    {
-        num <<= 1;
-        num++;
-    }
+    UINT64 num = (1 << bit_depth_) - 1;
     *data /= static_cast<double>(num);
 }
 
@@ -194,8 +190,6 @@ void MusicReader::read_file()
         length_ = duration.hVal.QuadPart; // 100 ns 단위로 재생 시간 계산 (1,000,000,000 ns = 1 s, 1,000,000 ns = 1 ms)
         sample_count = static_cast<DWORD>(length_ * sample_rate_ / 10'000'000);
     }
-
-    // printf("SAMPLE SIZE : %lld\n", sample_count);
 
     data_ = new double[sample_count]{0.f};
     data_len_ = 0;
@@ -294,7 +288,7 @@ void MusicReader::play_music()
 
     writer->BeginWriting();
     UINT32* shape = new UINT32[2];
-    output(&shape, nullptr, nullptr);
+    output(shape, nullptr, nullptr);
     
     // Source에서 샘플 읽기
     while (true)
@@ -326,12 +320,14 @@ void MusicReader::play_music()
     writer->Finalize();
 }
 
-result MusicReader::output(UINT32** length, LONGLONG* timestamp, LONGLONG* time_length)
+result MusicReader::output(UINT32* length, LONGLONG* timestamp, LONGLONG* time_length)
 {
     if(length != nullptr)
     {
-        (*length)[0] = num_chunks_;
-        (*length)[1] = WINDOW_SIZE / 2;
+        assert(this != NULL);
+        
+        length[0] = num_chunks_;
+        length[1] = WINDOW_SIZE / 2;
     }
     
     if(timestamp != nullptr)

@@ -3,6 +3,7 @@
 #include <vector>
 #include "objects/StageObject.h"
 
+class GLSCamera;
 class StageWaver;
 
 class StageBuilder
@@ -11,6 +12,7 @@ class StageBuilder
     void init();
 
     static std::vector<StageObject*> render_objects_;
+    static GLSCamera                 *camera_;
     
 public:
     
@@ -25,4 +27,5 @@ public:
 
     static std::vector<StageObject*> get_render_objects() { return render_objects_; }
     static void add_render_objects(StageObject* obj) { obj->ready(); render_objects_.push_back(obj); }
+    static GLSCamera* get_camera() { return camera_; }
 };

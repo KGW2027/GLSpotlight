@@ -24,8 +24,6 @@ class StageWaver : public StageObject
     MusicReader     *music_reader_ ;
     music_processor m_processor_   ;
     draw_data       draw_data_     ;
-    
-    
 
     void pre_render() override;
     void rendering() override;
@@ -33,6 +31,11 @@ class StageWaver : public StageObject
 
     void init_processor();
     void process_frame();
+    void render_3d();
+    
+    __declspec(deprecated("Use Render 3D"))
+    void render_2d();
+    
     
 public:
     StageWaver(const wchar_t* wav_path);

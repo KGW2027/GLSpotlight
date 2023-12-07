@@ -62,9 +62,9 @@ public:
 
     MusicReader(){}
     
-    explicit MusicReader(file_path path);
+    MusicReader(file_path path);
 
     void play_music();
     
-    result output(UINT32** length, LONGLONG* timestamp, LONGLONG* time_length);
+    result output(UINT32* length, LONGLONG* timestamp, LONGLONG* time_length);
 };

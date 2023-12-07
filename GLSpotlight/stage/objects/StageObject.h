@@ -6,6 +6,7 @@
 typedef glm::vec3 vec3;
 typedef glm::vec4* affine;
 typedef short size2d[2];
+typedef GLfloat*   mat_data;
 
 class StageObject
 {
@@ -17,6 +18,7 @@ protected:
     void update_window_size();
     void gl_pos_to_glut_pos(affine gl_pos);
     void glut_pos_to_gl_pos(affine glut_pos);
+    void color_rgb(float r, float g, float b);
 
     virtual void pre_render();
     virtual void rendering() {  }

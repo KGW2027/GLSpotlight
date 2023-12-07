@@ -2,9 +2,10 @@
 #include "StageWaver.h"
 
 #include <thread>
+#include <gl/freeglut.h>
 
 
-StageWaver::StageWaver(const wchar_t* wav_path) : music_reader_(nullptr), m_processor_()
+StageWaver::StageWaver(const wchar_t* wav_path) : music_reader_(nullptr), m_processor_(), draw_data_(nullptr)
 {
     path_ = wav_path;
     music_reader_ = new MusicReader(path_);
@@ -12,6 +13,9 @@ StageWaver::StageWaver(const wchar_t* wav_path) : music_reader_(nullptr), m_proc
 
 void StageWaver::ready()
 {
+    position_[0] -= 0.5f;
+    scale_ = {.8f, .8f, .8f};
+    
     // Play Spectrum Render
     init_processor();
     std::thread frame_proc(&StageWaver::process_frame, this);
@@ -32,28 +36,23 @@ void StageWaver::pre_render()
 void StageWaver::rendering()
 {
     // Freq dB 정보 갱신
-    double* cur_freq = m_processor_.freq[m_processor_.index];
-    for(uint i = 0 ; i < m_processor_.shape[1] ; i++)
+    if(m_processor_.index < m_processor_.shape[0])
     {
-        if( abs(MIN_dB + cur_freq[i]) < 0.01 ) draw_data_[i] *= MUTE_DECAY;
-        else draw_data_[i] = cur_freq[i];
+        double* cur_freq = m_processor_.freq[m_processor_.index];
+        for(uint i = 0 ; i < m_processor_.shape[1] ; i++)
+        {
+            if( abs(MIN_dB + cur_freq[i]) < 0.01 ) draw_data_[i] *= MUTE_DECAY;
+            else draw_data_[i] = cur_freq[i];
+        }
+    }
+    // 음악이 종료된 경우, 모든 값에 DECAY 해서 0으로 만듬.
+    else
+    {
+        for(uint i = 0 ; i < m_processor_.shape[1] ; i++) draw_data_[i] *= MUTE_DECAY;
     }
 
-    // Screen Rendering
-    glLineWidth(.5);
-    glColor3f(182/255., 231/255., 255/255.);
-    
-    glBegin(GL_LINES);
-    for(uint i = 0 ; i < m_processor_.shape[1] ; i++)
-    {
-        float shift = static_cast<float>(window_size_[0]) * 0.05f + static_cast<float>(i);
-        glm::vec4 pos(shift, static_cast<float>(window_size_[1]) / 2.0 - draw_data_[i]* -1.5, 0, 1);
-        glut_pos_to_gl_pos(&pos);
-        glVertex2f(pos[0], pos[1]);
-        glVertex2f(pos[0], -pos[1]);
-    }
-    glEnd();
-    
+    // render_2d();
+    render_3d();
 }
 
 void StageWaver::post_render()
@@ -80,4 +79,34 @@ void StageWaver::process_frame()
         std::this_thread::sleep_until(until_time += delay);
         m_processor_.current_time = std::chrono::duration_cast<std::chrono::milliseconds>(until_time - start_time).count();
     }while(++m_processor_.index < m_processor_.shape[0]);
+}
+
+void StageWaver::render_3d()
+{
+    glBegin(GL_QUADS);
+
+    glVertex3f(-1, -1, -1);
+    glVertex3f(1, -1, -1);
+    glVertex3f(1, -1, 1);
+    glVertex3f(-1, -1, 1);
+    
+    glEnd();
+}
+
+void StageWaver::render_2d()
+{
+    // Screen Rendering (2D)
+    glLineWidth(.5);
+    color_rgb(182, 231, 255);
+    
+    glBegin(GL_LINES);
+    for(uint i = 0 ; i < m_processor_.shape[1] ; i++)
+    {
+        float shift = static_cast<float>(window_size_[0]) * 0.05f + static_cast<float>(i);
+        glm::vec4 pos(shift, static_cast<float>(window_size_[1]) / 2.0 - draw_data_[i]* -1.5, 0, 1);
+        glut_pos_to_gl_pos(&pos);
+        glVertex2f(pos[0], pos[1]);
+        glVertex2f(pos[0], -pos[1]);
+    }
+    glEnd();
 }

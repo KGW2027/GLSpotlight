@@ -27,6 +27,11 @@ void StageObject::glut_pos_to_gl_pos(affine glut_pos)
     (*glut_pos)[1] = (static_cast<float>(window_size_[1]) - (*glut_pos)[1]) * 2.f / static_cast<float>(window_size_[1]) - 1;
 }
 
+void StageObject::color_rgb(float r, float g, float b)
+{
+    glColor3f(r / 255.f, g / 255.f, b / 255.f);
+}
+
 void StageObject::pre_render()
 {
     glPushMatrix();
