@@ -1,0 +1,28 @@
+﻿#pragma once
+
+#include <vector>
+#include "objects/StageObject.h"
+
+class StageWaver;
+
+class StageBuilder
+{
+    
+    void init();
+
+    static std::vector<StageObject*> render_objects_;
+    
+public:
+    
+    static StageBuilder *s_builder;
+           StageWaver   *waver;
+           unsigned int timer_tick;
+
+    StageBuilder(int argc, char *argv[]);
+
+    void start();
+    void set_fps(unsigned int fps) { timer_tick = 1000 / fps; }
+
+    static std::vector<StageObject*> get_render_objects() { return render_objects_; }
+    static void add_render_objects(StageObject* obj) { render_objects_.push_back(obj); }
+};
