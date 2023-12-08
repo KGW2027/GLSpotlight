@@ -48,11 +48,7 @@ void StageRoom::rendering()
     glBegin(GL_QUADS);
     for(RoomWall q : walls)
     {
-        glMaterialfv(GL_FRONT, GL_AMBIENT, q.ambient);
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, q.diffuse);
-        glMaterialfv(GL_FRONT, GL_SPECULAR, q.specular);
-        glMateriali(GL_FRONT, GL_SHININESS, q.shiniess);
-        color_rgb(q.colors[0], q.colors[1], q.colors[2]);
+        apply_material(GL_FRONT, q.material);
         for(unsigned int idx = 0 ; idx < 4 ; idx++)
             glVertex3f(q.points[idx][0], q.points[idx][1], q.points[idx][2]);
     }
@@ -68,53 +64,41 @@ void StageRoom::ready()
 {
     StageObject::ready();
 
-    float     *wall_color   = new float[3]{185, 122, 87};
-    GLfloat *wall_ambient   = new GLfloat[4]{0.3f, 0.3f, 0.3f, 1.0f};
-    GLfloat *wall_diffuse   = new GLfloat[4]{0.7f, 0.7f, 0.7f, 1.f};
-    GLfloat *wall_specular  = new GLfloat[4]{1.f, 1.f, 1.f, 1.f};
-    int     wall_shininess  = 0.5;
+    Material mat_wall = get_default_material();
+    mat_wall.color   = get_rgba_by_ubyte(255, 0, 0, 1.0);
+    mat_wall.ambient = new GLfloat[4]{0.3f, 0.3f, 0.3f, 1.0f};
+
+    Material mat_stage = get_default_material();
+    mat_stage.color   = new GLfloat[3]{0, 122, 0};
+    mat_stage.ambient = new GLfloat[4]{0.5f, 0.5f, 0.5f, 1.0f}; 
     
     // Ceil & Floor
-    walls.push_back(RoomWall{
-        make_quad(-4, -2, -1, 4, 2, -1),
-        wall_color, wall_ambient, wall_diffuse, wall_specular, wall_shininess
+    walls.push_back(RoomWall{ // Floor
+        make_quad(-4, -2, -1, 4, 2, -1), mat_wall
     });
-    walls.push_back(RoomWall{
-         make_quad(4, 2, 2, -4, -4, 2),
-        wall_color, wall_ambient, wall_diffuse, wall_specular, wall_shininess
+    walls.push_back(RoomWall{ // Ceil
+         make_quad(-4, 2, 2, 4, -4, 2), mat_wall
     });
 
     // Side Walls
-    walls.push_back(RoomWall{
-    make_quad(4, 2, 2, -4, 2, -1),
-        wall_color, wall_ambient, wall_diffuse, wall_specular, wall_shininess
+    walls.push_back(RoomWall{ // Entrance Wall (Camera Side)
+    make_quad(4, 2, 2, -4, 2, -1), mat_wall
     });
-    walls.push_back(RoomWall{
-         make_quad(4, -4, 2, 4, 2, -1),
-        wall_color, wall_ambient, wall_diffuse, wall_specular, wall_shininess
+    walls.push_back(RoomWall{ // Left Wall
+         make_quad(4, -4, 2, 4, 2, -1), mat_wall
     });
-    walls.push_back(RoomWall{
-         make_quad(-4, -4, 2, -4, 2, -1),
-        wall_color, wall_ambient, wall_diffuse, wall_specular, wall_shininess
+    walls.push_back(RoomWall{ // Right Wall
+         make_quad(-4, 2, 2, -4, -4, -1), mat_wall
     });
-    walls.push_back(RoomWall{
-         make_quad(-4, -4, -.5, 4, -4, 2),
-        wall_color, wall_ambient, wall_diffuse, wall_specular, wall_shininess
+    walls.push_back(RoomWall{ // Back-Stage Wall
+         make_quad(4, -4, -.5, -4, -4, 2), mat_wall
     });
-
-    float   *stage_color     = new float[3]{0, 122, 0};
-    GLfloat *stage_ambient   = new GLfloat[4]{0.f, 0.f, 0.f, 0.f};
-    GLfloat *stage_diffuse   = new GLfloat[4]{0.f, 0.f, 0.f, 0.f};
-    GLfloat *stage_specular  = new GLfloat[4]{0.f, 0.f, 0.f, 0.f};
-    int     stage_shininess  = 1;
     
     // Stage-Bottom Up
-    walls.push_back(RoomWall{
-         make_quad(-4, -2, -1, 4, -2, -.5),
-        stage_color, stage_ambient, stage_diffuse, stage_specular, stage_shininess
+    walls.push_back(RoomWall{ // Stage Step
+         make_quad(4, -2, -1, -4, -2, -.5), mat_stage
     });
-    walls.push_back(RoomWall{
-         make_quad(-4, -2, -.5, 4, -4, -.5),
-        stage_color, stage_ambient, stage_diffuse, stage_specular, stage_shininess
+    walls.push_back(RoomWall{ // Stage Floor
+         make_quad(4, -2, -.5, -4, -4, -.5), mat_stage
     });
 }

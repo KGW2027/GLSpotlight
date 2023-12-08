@@ -3,6 +3,7 @@
 #include "StageBuilder.h"
 
 #include "objects/StageRoom.h"
+#include "objects/StageSpotlight.h"
 #include "utils/GLSCamera.h"
 
 #define TIMER_INTERVAL 16
@@ -10,6 +11,7 @@
 StageBuilder* StageBuilder::s_builder = nullptr;
 std::vector<StageObject*> StageBuilder::render_objects_;
 GLSCamera* StageBuilder::camera_ = nullptr;
+std::vector<StageSpotlight*> StageBuilder::render_lights_;
 
 #pragma region Private GL Manage
 
@@ -90,26 +92,31 @@ void StageBuilder::start()
     // Spectrum Render 오브젝트 실행
     // add_render_objects(waver);
 
-    
+    // Light Sources
+    render_lights_.push_back(new StageSpotlight(GL_LIGHT0));
+    add_render_objects(render_lights_[0]);
 
     // OpenGL 액션 시작
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     glEnable(GL_DEPTH_TEST);
     // glEnable(GL_BLEND);
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_LEQUAL);
-
-    GLfloat AmbientLightValue[] = { 0.3f, 0.3f, 0.3f, 1.0f };
-    GLfloat DiffuseLightValue[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-    GLfloat SpecularLightValue[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    GLfloat PositionLightValue[] = { 0.0f, 0.0f, 1.0f, 1.0f };
-
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glLightfv( GL_LIGHT0, GL_AMBIENT, AmbientLightValue ); //Ambient 조명의 성질을 설정한다.
-    glLightfv( GL_LIGHT0, GL_DIFFUSE, DiffuseLightValue ); //Diffuse 조명의 성질을 설정한다.
-    glLightfv( GL_LIGHT0, GL_SPECULAR, SpecularLightValue ); //Specular 조명의 성질을 설정한다. 
-    glLightfv( GL_LIGHT0, GL_POSITION, PositionLightValue ); //조명의 위치(광원)를 설정한다.
+
+    // GLfloat AmbientLightValue[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+    // GLfloat DiffuseLightValue[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+    // GLfloat SpecularLightValue[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    // GLfloat PositionLightValue[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+
+    // glEnable(GL_LIGHT0);
+    // glLightfv( GL_LIGHT0, GL_AMBIENT, AmbientLightValue ); //Ambient 조명의 성질을 설정한다.
+    // glLightfv( GL_LIGHT0, GL_DIFFUSE, DiffuseLightValue ); //Diffuse 조명의 성질을 설정한다.
+    // glLightfv( GL_LIGHT0, GL_SPECULAR, SpecularLightValue ); //Specular 조명의 성질을 설정한다. 
+    // glLightfv( GL_LIGHT0, GL_POSITION, PositionLightValue ); //조명의 위치(광원)를 설정한다.
 
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_COLOR_MATERIAL);

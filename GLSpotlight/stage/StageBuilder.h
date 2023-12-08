@@ -3,6 +3,7 @@
 #include <vector>
 #include "objects/StageObject.h"
 
+class StageSpotlight;
 class GLSCamera;
 class StageWaver;
 
@@ -11,8 +12,9 @@ class StageBuilder
     
     void init();
 
-    static std::vector<StageObject*> render_objects_;
-    static GLSCamera                 *camera_;
+    static std::vector<StageObject*>    render_objects_;
+    static GLSCamera                    *camera_;
+    static std::vector<StageSpotlight*> render_lights_;          
     
 public:
     

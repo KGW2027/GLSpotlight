@@ -17,7 +17,8 @@ void GLSCamera::rotate_camera(float delta, bool is_x)
 
     forward_    = rot * tmpfwd;
     up_         = rot * tmpup; 
-    at_           = eye_ + forward_ * arm;
+    // at_           = eye_ + forward_ * arm;
+    eye_          = at_ - forward_ * arm;
     update_state();
 }
 
@@ -27,9 +28,9 @@ void GLSCamera::update()
     int height  = glutGet(GLUT_WINDOW_HEIGHT);
     
     float x_move = - MOUSE_SENSIVITY * (move_end_[0] - move_start_[0]) / width ;
-    // float y_move =   MOUSE_SENSIVITY * (move_end_[1] - move_start_[1]) / height;
+    float y_move =   MOUSE_SENSIVITY * (move_end_[1] - move_start_[1]) / height;
     rotate_camera(x_move, true);
-    // rotate_camera(y_move, false);
+    rotate_camera(y_move, false);
     move_start_ = move_end_;
     
     glMatrixMode(GL_PROJECTION);

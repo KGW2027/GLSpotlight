@@ -238,6 +238,7 @@
     <ClCompile Include="music\ParseLogger.cpp" />
     <ClCompile Include="stage\objects\StageObject.cpp" />
     <ClCompile Include="stage\objects\StageRoom.cpp" />
+    <ClCompile Include="stage\objects\StageSpotlight.cpp" />
     <ClCompile Include="stage\objects\StageWaver.cpp" />
     <ClCompile Include="stage\StageBuilder.cpp" />
     <ClCompile Include="stage\utils\GLSCamera.cpp" />
@@ -251,6 +252,7 @@
     <ClInclude Include="music\ParseLogger.h" />
     <ClInclude Include="stage\objects\StageObject.h" />
     <ClInclude Include="stage\objects\StageRoom.h" />
+    <ClInclude Include="stage\objects\StageSpotlight.h" />
     <ClInclude Include="stage\objects\StageWaver.h" />
     <ClInclude Include="stage\StageBuilder.h" />
     <ClInclude Include="stage\utils\GLSCamera.h" />

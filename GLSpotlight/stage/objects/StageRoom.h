@@ -7,12 +7,8 @@ typedef glm::vec3* quad;
 
 struct RoomWall
 {
-    quad        points      ;
-    float       *colors     ;
-    mat_data    ambient     ;
-    mat_data    diffuse     ;
-    mat_data    specular    ;
-    int         shiniess    ;
+    quad        points  ;
+    Material    material;
 };
 
 class StageRoom : public StageObject
