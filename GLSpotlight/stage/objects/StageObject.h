@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 typedef glm::vec3 vec3;
+typedef glm::vec3* quad;
 typedef glm::vec4 vec4;
 typedef glm::vec4* affine;
 typedef short size2d[2];
@@ -53,11 +54,14 @@ protected:
     virtual void rendering() {  }
     virtual void post_render() { glPopMatrix(); }
 
+    float get_random();
+    quad make_quad(float x1, float y1, float z1, float x2, float y2, float z2);
+
 public:
     virtual ~StageObject() = default;
     StageObject() : position_(0.f, 0.f, 0.f), rotate_(0.f, 0.f, 0.f), scale_(1.f, 1.f, 1.f), window_size_{0, 0} { }
 
-    virtual void ready() {}
+    virtual void ready();
     
     void render()
     {
@@ -66,6 +70,10 @@ public:
         post_render();
     }
 
+    void set_position(float x, float y, float z);
+    void add_position(float x, float y, float z);
+    void set_rotation(float x, float y, float z);
+    
     static Material get_default_material();
     static LightSource get_default_light_source();
     

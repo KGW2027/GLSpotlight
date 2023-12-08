@@ -17,8 +17,8 @@ void GLSCamera::rotate_camera(float delta, bool is_x)
 
     forward_    = rot * tmpfwd;
     up_         = rot * tmpup; 
-    // at_           = eye_ + forward_ * arm;
-    eye_          = at_ - forward_ * arm;
+    at_           = eye_ + forward_ * arm;
+    // eye_          = at_ - forward_ * arm;
     update_state();
 }
 

@@ -3,7 +3,6 @@
 
 #include "StageObject.h"
 
-typedef glm::vec3* quad;
 
 struct RoomWall
 {
@@ -15,7 +14,8 @@ class StageRoom : public StageObject
 {
 
     std::vector<RoomWall> walls; 
-    quad make_quad(float x1, float y1, float z1, float x2, float y2, float z2);
+
+    void draw_high_resolution(quad points);
 
 protected:
     void pre_render() override;

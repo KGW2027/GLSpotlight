@@ -94,29 +94,22 @@ void StageBuilder::start()
 
     // Light Sources
     render_lights_.push_back(new StageSpotlight(GL_LIGHT0));
+    render_lights_.push_back(new StageSpotlight(GL_LIGHT1));
+    render_lights_.push_back(new StageSpotlight(GL_LIGHT2));
+    render_lights_[0]->add_position(0, -1.8f, 1.8f);
+    render_lights_[1]->add_position(2, -1.8f, 1.8f);
+    render_lights_[2]->add_position(-2, -1.8f, 1.8f);
     add_render_objects(render_lights_[0]);
+    add_render_objects(render_lights_[1]);
+    add_render_objects(render_lights_[2]);
 
     // OpenGL 액션 시작
 
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
     glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_LIGHTING);
-
-    // GLfloat AmbientLightValue[] = { 0.3f, 0.3f, 0.3f, 1.0f };
-    // GLfloat DiffuseLightValue[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-    // GLfloat SpecularLightValue[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    // GLfloat PositionLightValue[] = { 0.0f, 0.0f, 1.0f, 1.0f };
-
-    // glEnable(GL_LIGHT0);
-    // glLightfv( GL_LIGHT0, GL_AMBIENT, AmbientLightValue ); //Ambient 조명의 성질을 설정한다.
-    // glLightfv( GL_LIGHT0, GL_DIFFUSE, DiffuseLightValue ); //Diffuse 조명의 성질을 설정한다.
-    // glLightfv( GL_LIGHT0, GL_SPECULAR, SpecularLightValue ); //Specular 조명의 성질을 설정한다. 
-    // glLightfv( GL_LIGHT0, GL_POSITION, PositionLightValue ); //조명의 위치(광원)를 설정한다.
 
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_COLOR_MATERIAL);

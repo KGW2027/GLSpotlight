@@ -2,7 +2,15 @@
 #include "StageObject.h"
 
 #include <algorithm>
+#include <ctime>
 #include <gl/freeglut.h>
+
+enum Expect_Axis
+{
+    EXPECT_X = 0x01,
+    EXPECT_Y = 0x02,
+    EXPECT_Z = 0x04
+};
 
 void StageObject::update_window_size()
 {
@@ -77,6 +85,66 @@ void StageObject::pre_render()
     glRotatef(rotate_[1], 0, 1, 0);
     glRotatef(rotate_[2], 0, 0, 1);
     glScalef(scale_[0], scale_[1], scale_[2]);
+}
+
+float StageObject::get_random()
+{
+    return static_cast<float>(rand()) / RAND_MAX;
+}
+
+quad StageObject::make_quad(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+    quad q = new glm::vec3[4];
+    Expect_Axis axis = x1 == x2 ? EXPECT_X : y1 == y2 ? EXPECT_Y : EXPECT_Z;
+    switch(axis)
+    {
+    case EXPECT_X:
+        q[0] = glm::vec3(x1, y1, z1);
+        q[1] = glm::vec3(x1, y2, z1);
+        q[2] = glm::vec3(x1, y2, z2);
+        q[3] = glm::vec3(x1, y1, z2);
+        break;
+    case EXPECT_Y:
+        q[0] = glm::vec3(x1, y1, z1);
+        q[1] = glm::vec3(x2, y1, z1);
+        q[2] = glm::vec3(x2, y1, z2);
+        q[3] = glm::vec3(x1, y1, z2);
+        break;
+    case EXPECT_Z:
+        q[0] = glm::vec3(x1, y1, z1);
+        q[1] = glm::vec3(x2, y1, z1);
+        q[2] = glm::vec3(x2, y2, z1);
+        q[3] = glm::vec3(x1, y2, z1);
+        break;
+    }
+
+    return q;
+}
+
+void StageObject::ready()
+{
+    srand(time(0));
+}
+
+void StageObject::set_position(float x, float y, float z)
+{
+    position_[0] = x;
+    position_[1] = y;
+    position_[2] = z;
+}
+
+void StageObject::add_position(float x, float y, float z)
+{
+    position_[0] += x;
+    position_[1] += y;
+    position_[2] += z;
+}
+
+void StageObject::set_rotation(float x, float y, float z)
+{
+    rotate_[0] = x;
+    rotate_[1] = y;
+    rotate_[2] = z;
 }
 
 Material StageObject::get_default_material()

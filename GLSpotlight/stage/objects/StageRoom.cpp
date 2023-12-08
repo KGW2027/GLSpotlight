@@ -1,41 +1,61 @@
 ﻿#include "StageRoom.h"
 
 
-enum Expect_Axis
+void StageRoom::draw_high_resolution(quad points)
 {
-    EXPECT_X = 0x01,
-    EXPECT_Y = 0x02,
-    EXPECT_Z = 0x04
-};
-
-
-quad StageRoom::make_quad(float x1, float y1, float z1, float x2, float y2, float z2)
-{
-    quad q = new glm::vec3[4];
-    Expect_Axis axis = x1 == x2 ? EXPECT_X : y1 == y2 ? EXPECT_Y : EXPECT_Z;
-    switch(axis)
+    float min_pos[3] = {9999, 9999, 9999}, max_pos[3] = {-9999, -9999, -9999};
+    std::vector<vec3> debug_vec3s;
+    for(int pidx = 0 ; pidx < 4 ; pidx++)
     {
-    case EXPECT_X:
-        q[0] = glm::vec3(x1, y1, z1);
-        q[1] = glm::vec3(x1, y2, z1);
-        q[2] = glm::vec3(x1, y2, z2);
-        q[3] = glm::vec3(x1, y1, z2);
-        break;
-    case EXPECT_Y:
-        q[0] = glm::vec3(x1, y1, z1);
-        q[1] = glm::vec3(x2, y1, z1);
-        q[2] = glm::vec3(x2, y1, z2);
-        q[3] = glm::vec3(x1, y1, z2);
-        break;
-    case EXPECT_Z:
-        q[0] = glm::vec3(x1, y1, z1);
-        q[1] = glm::vec3(x2, y1, z1);
-        q[2] = glm::vec3(x2, y2, z1);
-        q[3] = glm::vec3(x1, y2, z1);
-        break;
+        debug_vec3s.push_back(points[pidx]);
+        for(int idx = 0 ; idx < 3 ; idx++)
+        {
+            min_pos[idx] = std::min(min_pos[idx], points[pidx][idx]);
+            max_pos[idx] = std::max(max_pos[idx], points[pidx][idx]);
+        }
     }
 
-    return q;
+    std::vector<int> indices;
+    int expect = -1;
+    for(int idx = 0 ; idx < 3 ; idx++)
+    {
+        if(min_pos[idx] == max_pos[idx])
+            expect = idx;
+        else 
+            indices.push_back(idx);
+    }
+    
+    float resolution = 1.f / 20.f;
+    for(float p1 = min_pos[indices[0]] ; p1 <= max_pos[indices[0]] ; p1 += resolution)
+    {
+        for(float p2 = min_pos[indices[1]] ; p2 <= max_pos[indices[1]] ; p2 += resolution)
+        {
+            glBegin(GL_QUADS);
+            switch(expect)
+            {
+            case 0:
+                glVertex3f(min_pos[0], p1, p2);
+                glVertex3f(min_pos[0], p1 + resolution, p2);
+                glVertex3f(min_pos[0], p1 + resolution, p2 + resolution);
+                glVertex3f(min_pos[0], p1 , p2 + resolution);
+                break;
+            case 1:
+                glVertex3f(p1, min_pos[1], p2);
+                glVertex3f(p1 + resolution, min_pos[1], p2);
+                glVertex3f(p1 + resolution, min_pos[1], p2 + resolution);
+                glVertex3f(p1 , min_pos[1], p2 + resolution);
+                break;
+            case 2:
+                glVertex3f(p1,  p2, min_pos[2]);
+                glVertex3f(p1 + resolution,  p2, min_pos[2]);
+                glVertex3f(p1 + resolution,  p2 + resolution, min_pos[2]);
+                glVertex3f(p1 ,  p2 + resolution, min_pos[2]);
+                break;
+            }
+            glEnd();
+        }
+    }
+    
 }
 
 void StageRoom::pre_render()
@@ -45,14 +65,11 @@ void StageRoom::pre_render()
 
 void StageRoom::rendering()
 {
-    glBegin(GL_QUADS);
     for(RoomWall q : walls)
     {
         apply_material(GL_FRONT, q.material);
-        for(unsigned int idx = 0 ; idx < 4 ; idx++)
-            glVertex3f(q.points[idx][0], q.points[idx][1], q.points[idx][2]);
+        draw_high_resolution(q.points);
     }
-    glEnd();
 }
 
 void StageRoom::post_render()
