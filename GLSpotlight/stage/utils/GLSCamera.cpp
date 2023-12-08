@@ -1,10 +1,6 @@
 ﻿#include "GLSCamera.h"
 
-#include <windows.h>
 #include <gl/freeglut.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-
 #define MOUSE_SENSIVITY 30.0
 #define MOUSE_WHEEL_SENSIVITY 0.03
 
@@ -40,13 +36,6 @@ void GLSCamera::update()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(eye_[0], eye_[1], eye_[2], at_[0], at_[1], at_[2], up_[0], up_[1], up_[2]);
-
-    glBegin(GL_LINES);
-    
-    glColor3f(1, 0, 0);
-    glVertex3f(eye_[0], eye_[1], eye_[2]);
-    glVertex3f(at_[0], at_[1], at_[2]);
-    glEnd();
 }
 
 void GLSCamera::mouse_click(int button, int state, int x, int y)

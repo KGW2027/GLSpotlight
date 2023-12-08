@@ -1,8 +1,10 @@
 ﻿
 #include "StageWaver.h"
+#include "../../music/MusicReader.h"
 
 #include <thread>
-#include <gl/freeglut.h>
+#include <glm/common.hpp>
+
 
 StageWaver::StageWaver(const wchar_t* wav_path) : music_reader_(nullptr), m_processor_(), draw_data_(nullptr)
 {
@@ -96,7 +98,7 @@ void StageWaver::process_frame()
 void StageWaver::render_3d()
 {
     // 배경 생성
-    draw_meshes(meshes_, 10);
+    // draw_meshes(meshes_, 10);
 
     glTranslatef(0, 0, 0.1f);
     apply_material(GL_FRONT_AND_BACK, mat_freq_);
@@ -108,22 +110,4 @@ void StageWaver::render_3d()
         quad q = make_quad(sx, 0.01f, -norm_value, ex, 0.01f, norm_value);
         draw_quad(q);
     }
-}
-
-void StageWaver::render_2d()
-{
-    // Screen Rendering (2D)
-    glLineWidth(.5);
-    color_rgb(182, 231, 255);
-    
-    glBegin(GL_LINES);
-    for(uint i = 0 ; i < m_processor_.shape[1] ; i++)
-    {
-        float shift = static_cast<float>(window_size_[0]) * 0.05f + static_cast<float>(i);
-        glm::vec4 pos(shift, static_cast<float>(window_size_[1]) / 2.0 - draw_data_[i]* -1.5, 0, 1);
-        glut_pos_to_gl_pos(&pos);
-        glVertex2f(pos[0], pos[1]);
-        glVertex2f(pos[0], -pos[1]);
-    }
-    glEnd();
 }

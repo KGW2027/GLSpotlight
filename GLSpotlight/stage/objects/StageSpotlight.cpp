@@ -1,8 +1,7 @@
 ﻿#include "StageSpotlight.h"
 
 #include <thread>
-#include <gl/freeglut.h>
-#include <glm/gtc/type_ptr.hpp>
+#include <glm/common.hpp>
 
 void StageSpotlight::pre_render()
 {
@@ -42,8 +41,8 @@ StageSpotlight::StageSpotlight(GLenum light_source)
 {
     light_data_ = get_default_light_source();
     light_data_.id = light_source;
-    light_data_.ambient  = get_rgba_by_ubyte(255, 255, 0, 1.0);
-    light_data_.specular = get_rgba_by_ubyte(128, 128, 0, 1.0);
+    // light_data_.ambient  = get_rgba_by_ubyte(0, 0, 0, 1.0);
+    // light_data_.specular = get_rgba_by_ubyte(255, 255, 255, 1.0);
     light_data_.diffuse  = get_rgba_by_ubyte(255, 255, 255, 1.0);
     light_data_.cut_off  = 40.0f;
     light_data_.exponent = 15.0f;

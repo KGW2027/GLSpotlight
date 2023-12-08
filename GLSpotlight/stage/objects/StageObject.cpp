@@ -1,9 +1,9 @@
 ﻿
 #include "StageObject.h"
-
 #include <algorithm>
 #include <ctime>
 #include <gl/freeglut.h>
+#include <glm/common.hpp>
 
 enum Expect_Axis
 {
@@ -12,14 +12,19 @@ enum Expect_Axis
     EXPECT_Z = 0x04
 };
 
-void StageObject::draw_quad(quad q)
+
+#pragma region Settings
+
+
+float StageObject::get_random()
 {
-    glBegin(GL_QUADS);
-    for(int idx = 0 ; idx < 4 ; idx++)
-        glVertex3f(q[idx][0], q[idx][1], q[idx][2]);
-    glEnd();
+    return static_cast<float>(rand()) / RAND_MAX;
 }
 
+/**
+ * \brief x,y,z에 대한 Rotator 정보를 이용해 Transformation Matrix를 회전시킨다.
+ * \param rotator (x, y, z) - 각 축 회전에 대한 degree 정보
+ */
 void StageObject::rotate_self(vec3 rotator)
 {
     glRotatef(rotator[0], 1, 0, 0);
@@ -27,36 +32,22 @@ void StageObject::rotate_self(vec3 rotator)
     glRotatef(rotator[2], 0, 0, 1);
 }
 
-void StageObject::update_window_size()
-{
-    window_size_[0] = static_cast<short>(glutGet(GLUT_WINDOW_WIDTH ));
-    window_size_[1] = static_cast<short>(glutGet(GLUT_WINDOW_HEIGHT));
-}
-
-void StageObject::gl_pos_to_glut_pos(affine gl_pos)
-{
-    update_window_size();
-    
-    (*gl_pos)[0] = static_cast<float>(window_size_[0]) * ((*gl_pos)[0] + 1) / 2.f;
-
-    float gp1 = (*gl_pos)[1];
-    float height = window_size_[1];
-    
-    (*gl_pos)[1] = -(height * (gp1 + 1) / 2.f) + height;
-}
-
-void StageObject::glut_pos_to_gl_pos(affine glut_pos)
-{
-    update_window_size();
-    (*glut_pos)[0] = (*glut_pos)[0] * 2 / static_cast<float>(window_size_[0]) - 1;
-    (*glut_pos)[1] = (static_cast<float>(window_size_[1]) - (*glut_pos)[1]) * 2.f / static_cast<float>(window_size_[1]) - 1;
-}
-
+/**
+ * \brief 0~255의 데이터를 받아 0~1 구간으로 변환 후 색으로 적용
+ * \param r Red Color value (0-255)
+ * \param g Green Color value (0-255)
+ * \param b Blue Color value (0-255)
+ */
 void StageObject::color_rgb(float r, float g, float b)
 {
     glColor3f(r / 255.f, g / 255.f, b / 255.f);
 }
 
+/**
+ * \brief Material 구조체를 받아 Face에 적용
+ * \param face 적용할 Face
+ * \param mat  타겟 Material Struct
+ */
 void StageObject::apply_material(GLenum face, Material mat)
 {
     if(mat.color[0] > 1.0 || mat.color[1] > 1.0 || mat.color[2] > 1.0)
@@ -71,6 +62,10 @@ void StageObject::apply_material(GLenum face, Material mat)
     glMaterialf (face, GL_SHININESS, mat.shininess);
 }
 
+/**
+ * \brief LightSource 구조체를 받아 빛 정보 반영
+ * \param light 타겟 LightSource Struct
+ */
 void StageObject::apply_lightdata(LightSource light)
 {
     glEnable(light.id);
@@ -84,6 +79,72 @@ void StageObject::apply_lightdata(LightSource light)
     glLightf (light.id, GL_QUADRATIC_ATTENUATION, light.attenuation[2]);
 }
 
+/**
+ * \brief RGBA 정보를 0~255 값으로 받아 반환한다.
+ * \param red  Red Color value (0-255)
+ * \param green Green Color value (0-255)
+ * \param blue  Blue Color value (0-255)
+ * \param alpha Alpha Value (0-1)
+ * \return 
+ */
+GLfloat* StageObject::get_rgba_by_ubyte(float red, float green, float blue, float alpha)
+{
+    red   = glm::clamp(red, 0.0f, 255.0f);
+    blue  = glm::clamp(blue, 0.0f, 255.0f);
+    green = glm::clamp(green, 0.0f, 255.0f);
+    return new GLfloat[4]{red / 255.f, green / 255.f, blue / 255.f, alpha};
+}
+
+
+/**
+ * \brief 점 2개의 3차원 좌표를 받아 Quad로 구성한다.
+ * 두 정점의 x,y,z중 하나 이상이 같아야 한다.
+ * x,y,z 중 하나가 같게 하기 위해서, 회전값을 먼저 수정해야할 수 있다.
+ * \param x1 첫 번째 정점의 X 좌표
+ * \param y1 첫 번째 정점의 Y 좌표
+ * \param z1 첫 번째 정점의 Z 좌표
+ * \param x2 두 번째 정점의 X 좌표
+ * \param y2 두 번째 정점의 Y 좌표
+ * \param z2 두 번째 정점의 Z 좌표
+ * \return 두 정점을 대각선으로 갖는 면의 네 정점 좌표 정보 (vec3[4])
+ */
+quad StageObject::make_quad(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+    quad q = new glm::vec3[4];
+    Expect_Axis axis = x1 == x2 ? EXPECT_X : y1 == y2 ? EXPECT_Y : EXPECT_Z;
+    switch(axis)
+    {
+    case EXPECT_X:
+        q[0] = glm::vec3(x1, y1, z1);
+        q[1] = glm::vec3(x1, y2, z1);
+        q[2] = glm::vec3(x1, y2, z2);
+        q[3] = glm::vec3(x1, y1, z2);
+        break;
+    case EXPECT_Y:
+        q[0] = glm::vec3(x1, y1, z1);
+        q[1] = glm::vec3(x2, y1, z1);
+        q[2] = glm::vec3(x2, y1, z2);
+        q[3] = glm::vec3(x1, y1, z2);
+        break;
+    case EXPECT_Z:
+        q[0] = glm::vec3(x1, y1, z1);
+        q[1] = glm::vec3(x2, y1, z1);
+        q[2] = glm::vec3(x2, y2, z1);
+        q[3] = glm::vec3(x1, y2, z1);
+        break;
+    }
+
+    return q;
+}
+
+#pragma endregion 
+
+#pragma region Draw
+/**
+ * \brief Mesh 목록을 받아 월드에 렌더한다.<br/>Resolution에 20을 입력할 시, 20x20 으로 렌더된다.
+ * \param meshes 렌더할 Mesh Vector
+ * \param resolution_ 각 메시를 몇x몇 으로 분할하여 렌더할 것인지. 
+ */
 void StageObject::draw_meshes(std::vector<Mesh> meshes, const int resolution_)
 {
     // 분할 해상도 (resolution_ 이 20일 경우, 면을 20x20으로 분할)
@@ -141,6 +202,13 @@ void StageObject::draw_meshes(std::vector<Mesh> meshes, const int resolution_)
     
 }
 
+/**
+ * \brief 원기둥을 그린다. Transformation Matrix는 변경되지 않는다.
+ * \param origin 원기둥의 중앙점
+ * \param rotate 원기둥의 회전 정보 (Rotator)
+ * \param radius 원기둥의 반지름
+ * \param height 원기둥의 높이
+ */
 void StageObject::draw_cylinder(vec3 origin, vec3 rotate, float radius, float height)
 {
     glPushMatrix();
@@ -150,14 +218,26 @@ void StageObject::draw_cylinder(vec3 origin, vec3 rotate, float radius, float he
     glPopMatrix();
 }
 
-GLfloat* StageObject::get_rgba_by_ubyte(float red, float green, float blue, float alpha)
+
+/**
+ * \brief float[4][3] 을 이용해 QUAD를 그린다.
+ * \param q float[4][3] - 면을 구성하는 점 4개의 정보
+ */
+void StageObject::draw_quad(quad q)
 {
-    red   = glm::clamp(red, 0.0f, 255.0f);
-    blue  = glm::clamp(blue, 0.0f, 255.0f);
-    green = glm::clamp(green, 0.0f, 255.0f);
-    return new GLfloat[4]{red / 255.f, green / 255.f, blue / 255.f, alpha};
+    glBegin(GL_QUADS);
+    for(int idx = 0 ; idx < 4 ; idx++)
+        glVertex3f(q[idx][0], q[idx][1], q[idx][2]);
+    glEnd();
 }
 
+#pragma endregion
+
+#pragma region Virtual
+
+/**
+ * \brief rendering() 함수 실행 이전에 실행되는 함수.<br/>transformation matrix의 변환이 이뤄진다.
+ */
 void StageObject::pre_render()
 {
     glPushMatrix();
@@ -166,45 +246,19 @@ void StageObject::pre_render()
     glScalef(scale_[0], scale_[1], scale_[2]);
 }
 
-float StageObject::get_random()
-{
-    return static_cast<float>(rand()) / RAND_MAX;
-}
-
-quad StageObject::make_quad(float x1, float y1, float z1, float x2, float y2, float z2)
-{
-    quad q = new glm::vec3[4];
-    Expect_Axis axis = x1 == x2 ? EXPECT_X : y1 == y2 ? EXPECT_Y : EXPECT_Z;
-    switch(axis)
-    {
-    case EXPECT_X:
-        q[0] = glm::vec3(x1, y1, z1);
-        q[1] = glm::vec3(x1, y2, z1);
-        q[2] = glm::vec3(x1, y2, z2);
-        q[3] = glm::vec3(x1, y1, z2);
-        break;
-    case EXPECT_Y:
-        q[0] = glm::vec3(x1, y1, z1);
-        q[1] = glm::vec3(x2, y1, z1);
-        q[2] = glm::vec3(x2, y1, z2);
-        q[3] = glm::vec3(x1, y1, z2);
-        break;
-    case EXPECT_Z:
-        q[0] = glm::vec3(x1, y1, z1);
-        q[1] = glm::vec3(x2, y1, z1);
-        q[2] = glm::vec3(x2, y2, z1);
-        q[3] = glm::vec3(x1, y2, z1);
-        break;
-    }
-
-    return q;
-}
-
+/**
+ * \brief 오브젝트를 등록할 때 단 한 번 실행된다.
+ */
 void StageObject::ready()
 {
     srand(time(0));
 }
 
+#pragma endregion 
+
+/**
+ * \brief 오브젝트의 월드 좌표를 설정한다.
+ */
 void StageObject::set_position(float x, float y, float z)
 {
     position_[0] = x;
@@ -212,6 +266,9 @@ void StageObject::set_position(float x, float y, float z)
     position_[2] = z;
 }
 
+/**
+ * \brief 오브젝트의 상대 좌표를 설정한다.
+ */
 void StageObject::add_position(float x, float y, float z)
 {
     position_[0] += x;
@@ -219,6 +276,9 @@ void StageObject::add_position(float x, float y, float z)
     position_[2] += z;
 }
 
+/**
+ * \brief 오브젝트의 로테이터를 설정한다.
+ */
 void StageObject::set_rotation(float x, float y, float z)
 {
     rotate_[0] = x;
@@ -226,6 +286,9 @@ void StageObject::set_rotation(float x, float y, float z)
     rotate_[2] = z;
 }
 
+/**
+ * \brief 기본 Material Struct를 반환한다.
+ */
 Material StageObject::get_default_material()
 {
     return Material {
@@ -238,6 +301,9 @@ Material StageObject::get_default_material()
     };
 }
 
+/**
+ * \brief 기본 LightSource Struct를 반환한다.
+ */
 LightSource StageObject::get_default_light_source()
 {
     return LightSource {

@@ -1,5 +1,6 @@
 ﻿#include "StageRoom.h"
 
+
 void StageRoom::pre_render()
 {
     StageObject::pre_render();
@@ -25,7 +26,7 @@ void StageRoom::ready()
 
     Material mat_wall = get_default_material();
     mat_wall.color   = get_rgba_by_ubyte(255, 0, 0, 1.0);
-    mat_wall.ambient = new GLfloat[4]{0.3f, 0.3f, 0.3f, 1.0f};
+    mat_wall.ambient = new GLfloat[4]{0.f, 0.f, 0.f, 1.0f};
 
     Material mat_stage = get_default_material();
     mat_stage.color   = new GLfloat[3]{0, 122, 0};

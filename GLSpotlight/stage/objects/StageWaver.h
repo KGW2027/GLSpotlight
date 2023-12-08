@@ -1,12 +1,17 @@
 ﻿#pragma once
+
 #include "StageObject.h"
-#include "../../music/MusicReader.h"
 
 typedef double** frequencies;
 typedef double*  draw_data;
 
 #define MUTE_DECAY 0.9
 #define MIN_dB     80.0
+
+typedef unsigned int UINT32;
+typedef long long LONGLONG;
+
+class MusicReader;
 
 struct music_processor
 {
@@ -33,9 +38,6 @@ class StageWaver : public StageObject
     void init_processor();
     void process_frame();
     void render_3d();
-    
-    __declspec(deprecated("Use Render 3D"))
-    void render_2d();
     
     
 public:

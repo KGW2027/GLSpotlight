@@ -1,10 +1,13 @@
-﻿#include <gl/freeglut.h>
-#include "objects/StageWaver.h"
-#include "StageBuilder.h"
+﻿
+#include <gl/glew.h>
+#include <gl/freeglut.h>
 
+#include "objects/StageWaver.h"
 #include "objects/StageRoom.h"
 #include "objects/StageSpotlight.h"
 #include "utils/GLSCamera.h"
+#include "utils/GLSShader.h"
+#include "StageBuilder.h"
 
 #define TIMER_INTERVAL 16
 
@@ -12,15 +15,18 @@ StageBuilder* StageBuilder::s_builder = nullptr;
 std::vector<StageObject*> StageBuilder::render_objects_;
 GLSCamera* StageBuilder::camera_ = nullptr;
 std::vector<StageSpotlight*> StageBuilder::render_lights_;
+GLSShader* StageBuilder::shader_ = nullptr;
 
 #pragma region Private GL Manage
 
 void display()
 {
     assert(StageBuilder::s_builder != nullptr);
+    assert(StageBuilder::shader_ != nullptr);
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
+    glUseProgram(StageBuilder::shader_->get_program_id());
     StageBuilder::get_camera()->update();
     
     for(StageObject* obj : StageBuilder::get_render_objects())
@@ -104,20 +110,30 @@ void StageBuilder::start()
     add_render_objects(render_lights_[2]);
 
     // OpenGL 액션 시작
+    glewInit();
+    shader_ = new GLSShader();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthFunc(GL_LEQUAL);
+    glDepthFunc(GL_LESS);
+    
     glEnable(GL_LIGHTING);
 
-    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    glColorMaterial(GL_FRONT, GL_AMBIENT);
     glEnable(GL_COLOR_MATERIAL);
     
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    glEnable(GL_POLYGON_SMOOTH);
-    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    // glEnable(GL_POLYGON_SMOOTH);
+    // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     
     glutMainLoop();
 }
+
+void StageBuilder::add_render_objects(StageObject* obj)
+{
+    obj->ready();
+    render_objects_.push_back(obj);
+}
+

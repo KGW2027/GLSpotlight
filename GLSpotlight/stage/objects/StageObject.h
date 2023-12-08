@@ -1,14 +1,13 @@
 ﻿#pragma once
+#include <gl/glew.h>
 #include <vector>
-#include <windows.h>
-#include <GL/gl.h>
-#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 typedef glm::vec3 vec3;
 typedef glm::vec3* quad;
 typedef glm::vec4 vec4;
 typedef glm::vec4* affine;
-typedef short size2d[2];
 typedef GLfloat*   farr;
 
 struct LightSource
@@ -42,23 +41,18 @@ struct Mesh
 
 class StageObject
 {
-
-    void rotate_self(vec3 rotator);
-    
 protected:
     vec3 position_, rotate_, scale_;
-    size2d window_size_;
     std::vector<Mesh> meshes_;
-
-    
-    void update_window_size();
-    void gl_pos_to_glut_pos(affine gl_pos);
-    void glut_pos_to_gl_pos(affine glut_pos);
 
 #pragma region Settings
     void color_rgb(float r, float g, float b);
     void apply_material(GLenum face, Material mat);
     void apply_lightdata(LightSource light);
+    void rotate_self(vec3 rotator);
+    float get_random();
+    quad make_quad(float x1, float y1, float z1, float x2, float y2, float z2);
+    GLfloat* get_rgba_by_ubyte(float red, float green, float blue, float alpha);
 #pragma endregion
 
 #pragma region Draw
@@ -67,18 +61,15 @@ protected:
     void draw_cylinder(vec3 origin, vec3 rotate, float radius, float height);
 #pragma endregion 
 
-    GLfloat* get_rgba_by_ubyte(float red, float green, float blue, float alpha);
-
+#pragma region Virtual
     virtual void pre_render();
     virtual void rendering() {  }
     virtual void post_render() { glPopMatrix(); }
-
-    float get_random();
-    quad make_quad(float x1, float y1, float z1, float x2, float y2, float z2);
+#pragma endregion 
 
 public:
     virtual ~StageObject() = default;
-    StageObject() : position_(0.f, 0.f, 0.f), rotate_(0.f, 0.f, 0.f), scale_(1.f, 1.f, 1.f), window_size_{0, 0} { }
+    StageObject() : position_(0.f, 0.f, 0.f), rotate_(0.f, 0.f, 0.f), scale_(1.f, 1.f, 1.f) { }
 
     virtual void ready();
     

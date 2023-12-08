@@ -242,6 +242,7 @@
     <ClCompile Include="stage\objects\StageWaver.cpp" />
     <ClCompile Include="stage\StageBuilder.cpp" />
     <ClCompile Include="stage\utils\GLSCamera.cpp" />
+    <ClCompile Include="stage\utils\GLSShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -256,6 +257,7 @@
     <ClInclude Include="stage\objects\StageWaver.h" />
     <ClInclude Include="stage\StageBuilder.h" />
     <ClInclude Include="stage\utils\GLSCamera.h" />
+    <ClInclude Include="stage\utils\GLSShader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
