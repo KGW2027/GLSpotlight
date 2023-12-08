@@ -6,8 +6,10 @@
 #include "objects/StageRoom.h"
 #include "objects/StageSpotlight.h"
 #include "utils/GLSCamera.h"
-#include "utils/GLSShader.h"
 #include "StageBuilder.h"
+
+#include "objects/StageStage.h"
+#include "textures/TextureBase.h"
 
 #define TIMER_INTERVAL 16
 
@@ -15,18 +17,17 @@ StageBuilder* StageBuilder::s_builder = nullptr;
 std::vector<StageObject*> StageBuilder::render_objects_;
 GLSCamera* StageBuilder::camera_ = nullptr;
 std::vector<StageSpotlight*> StageBuilder::render_lights_;
-GLSShader* StageBuilder::shader_ = nullptr;
 
 #pragma region Private GL Manage
 
 void display()
 {
     assert(StageBuilder::s_builder != nullptr);
-    assert(StageBuilder::shader_ != nullptr);
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(StageBuilder::shader_->get_program_id());
+    // glUseProgram(StageBuilder::shader_->get_program_id());
+    
     StageBuilder::get_camera()->update();
     
     for(StageObject* obj : StageBuilder::get_render_objects())
@@ -35,6 +36,8 @@ void display()
         obj->render();
     }
 
+    // glUseProgram(0);
+    
     glutSwapBuffers();
 }
 
@@ -89,11 +92,21 @@ StageBuilder::StageBuilder(int argc, char* argv[])
     
 }
 
+void StageBuilder::load_textures()
+{
+    TextureBase::load_texture("../textures/stage.png", "Stage");
+    TextureBase::load_texture("../textures/spotlight.png", "Spotlight");
+    TextureBase::load_texture("../textures/metal.png", "Metal");
+    TextureBase::load_texture("../textures/room.png", "Room");
+}
+
 void StageBuilder::start()
 {
+    load_textures();
     
     // Building Wall Add
     add_render_objects(new StageRoom());
+    add_render_objects(new StageStage());
     
     // Spectrum Render 오브젝트 실행
     add_render_objects(waver);
@@ -111,7 +124,6 @@ void StageBuilder::start()
 
     // OpenGL 액션 시작
     glewInit();
-    shader_ = new GLSShader();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -125,8 +137,9 @@ void StageBuilder::start()
     
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    // glEnable(GL_POLYGON_SMOOTH);
-    // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
     
     glutMainLoop();
 }

@@ -5,6 +5,7 @@
   <Import Project="..\packages\glew.v140.1.12.0\build\native\glew.v140.targets" Condition="Exists('..\packages\glew.v140.1.12.0\build\native\glew.v140.targets')" />
   <Import Project="..\packages\fftw_339.3.3.9.202108273\build\native\fftw_339.props" Condition="Exists('..\packages\fftw_339.3.3.9.202108273\build\native\fftw_339.props')" />
   <Import Project="..\packages\BassBoom.Native.0.0.2.1\BassBoom.Native.targets" Condition="Exists('..\packages\BassBoom.Native.0.0.2.1\BassBoom.Native.targets')" />
+  <Import Project="..\packages\soil.1.16.0\build\native\soil.props" Condition="Exists('..\packages\soil.1.16.0\build\native\soil.props')"/>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -239,10 +240,11 @@
     <ClCompile Include="stage\objects\StageObject.cpp" />
     <ClCompile Include="stage\objects\StageRoom.cpp" />
     <ClCompile Include="stage\objects\StageSpotlight.cpp" />
+    <ClCompile Include="stage\objects\StageStage.cpp" />
     <ClCompile Include="stage\objects\StageWaver.cpp" />
     <ClCompile Include="stage\StageBuilder.cpp" />
+    <ClCompile Include="stage\textures\TextureBase.cpp" />
     <ClCompile Include="stage\utils\GLSCamera.cpp" />
-    <ClCompile Include="stage\utils\GLSShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -254,10 +256,11 @@
     <ClInclude Include="stage\objects\StageObject.h" />
     <ClInclude Include="stage\objects\StageRoom.h" />
     <ClInclude Include="stage\objects\StageSpotlight.h" />
+    <ClInclude Include="stage\objects\StageStage.h" />
     <ClInclude Include="stage\objects\StageWaver.h" />
     <ClInclude Include="stage\StageBuilder.h" />
+    <ClInclude Include="stage\textures\TextureBase.h" />
     <ClInclude Include="stage\utils\GLSCamera.h" />
-    <ClInclude Include="stage\utils\GLSShader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

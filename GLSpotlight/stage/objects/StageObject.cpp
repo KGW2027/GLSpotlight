@@ -32,6 +32,42 @@ void StageObject::rotate_self(vec3 rotator)
     glRotatef(rotator[2], 0, 0, 1);
 }
 
+void StageObject::load_texture(bool is_auto_mapping, unsigned texture_id)
+{
+    if(is_auto_mapping)
+    {
+        glEnable(GL_TEXTURE_GEN_S);
+        glEnable(GL_TEXTURE_GEN_T);
+    }
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+}
+
+void StageObject::unload_texture()
+{
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+}
+
+/**
+ * \brief Material 정보를 리셋합니다.
+ */
+void StageObject::reset_material()
+{
+    glColor3f(0, 0, 0);
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   zero_);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   zero_);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  zero_);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  zero_);
+    glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 0);
+    
+}
+
 /**
  * \brief 0~255의 데이터를 받아 0~1 구간으로 변환 후 색으로 적용
  * \param r Red Color value (0-255)
@@ -137,6 +173,24 @@ quad StageObject::make_quad(float x1, float y1, float z1, float x2, float y2, fl
     return q;
 }
 
+/**
+ * \brief sx을 받아 dx, dy를 이용해 2차원 텍스처 Coordinate를 반환
+ * \param sx 시작 x 지점
+ * \param sy 시작 y 지점
+ * \param dx +x 방향 변화값
+ * \param dy +y 방향 변화값
+ * \return 
+ */
+quad StageObject::make_coord(float sx, float sy, float dx, float dy)
+{
+    quad q = new glm::vec3[4];
+    q[0] = glm::vec3(sx,        sy, 0);
+    q[1] = glm::vec3(sx + dx, sy, 0);
+    q[2] = glm::vec3(sx + dx, sy + dy, 0);
+    q[3] = glm::vec3(sx, sy + dy, 0);
+    return q;
+}
+
 #pragma endregion 
 
 #pragma region Draw
@@ -194,8 +248,13 @@ void StageObject::draw_meshes(std::vector<Mesh> meshes, const int resolution_)
                        : expect == 2 ? make_quad(s1, s2, min_pos[2], e1, e2, min_pos[2])
                        : nullptr;
                 if(q == nullptr) continue;
+
+                float loc_p1 = (max_pos[indices[0]] - p1) / (max_pos[indices[0]] - min_pos[indices[0]]);
+                float loc_p2 = (max_pos[indices[1]] - p2) / (max_pos[indices[1]] - min_pos[indices[1]]);
+                float delta  = 1.0f / static_cast<float>(resolution_);
+                quad coord = make_coord(loc_p1, loc_p2, delta, delta);
                 
-                draw_quad(q);
+                draw_quad_with_coord(q, coord);
             }
         }
     }
@@ -220,14 +279,30 @@ void StageObject::draw_cylinder(vec3 origin, vec3 rotate, float radius, float he
 
 
 /**
- * \brief float[4][3] 을 이용해 QUAD를 그린다.
- * \param q float[4][3] - 면을 구성하는 점 4개의 정보
+ * \brief vec3[4] 을 이용해 QUAD를 그린다.
+ * \param q vec3[4] - 면을 구성하는 점 4개의 정보
  */
 void StageObject::draw_quad(quad q)
 {
     glBegin(GL_QUADS);
     for(int idx = 0 ; idx < 4 ; idx++)
         glVertex3f(q[idx][0], q[idx][1], q[idx][2]);
+    glEnd();
+}
+
+/**
+ * \brief vec3[4]와 vec2[4]를 이용해 QUAD를 그린다.
+ * \param q vec3[4] - 면을 구성하는 점 4개의 정보
+ * \param coord vec2[4] - 각 점의 coordinate
+ */
+void StageObject::draw_quad_with_coord(quad q, quad coord)
+{
+    glBegin(GL_QUADS);
+    for(int idx = 0 ; idx < 4 ; idx++)
+    {
+        glTexCoord2f(coord[idx][0], coord[idx][1]);
+        glVertex3f(q[idx][0], q[idx][1], q[idx][2]);
+    }
     glEnd();
 }
 

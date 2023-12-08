@@ -7,6 +7,7 @@ class StageSpotlight : public StageObject
     LightSource         light_data_   ;
     float               yaw_offset_   ;
     float               yaw_direction_;
+    unsigned int        tid_metal, tid_cam;
     
     void pre_render() override;
     void rendering() override;

@@ -1,5 +1,9 @@
 ﻿#include "StageRoom.h"
 
+#include "../textures/TextureBase.h"
+
+#define TEXTURE_CYL "Metal"
+#define TEXTURE_ROOM "Room"
 
 void StageRoom::pre_render()
 {
@@ -9,10 +13,15 @@ void StageRoom::pre_render()
 void StageRoom::rendering()
 {
     // Spotlight Hanger
+    
+    load_texture(true, tid_metal);
     draw_cylinder(vec3(-1.77, -1.65, -3), vec3(0, 90, 0), 0.05f, 6);
+    unload_texture();
 
     // Draw Room
+    load_texture(false, tid_room);
     draw_meshes(meshes_, 20);
+    unload_texture();
 }
 
 void StageRoom::post_render()
@@ -25,12 +34,8 @@ void StageRoom::ready()
     StageObject::ready();
 
     Material mat_wall = get_default_material();
-    mat_wall.color   = get_rgba_by_ubyte(255, 0, 0, 1.0);
+    mat_wall.color   = get_rgba_by_ubyte(25, 0, 0, 1.0);
     mat_wall.ambient = new GLfloat[4]{0.f, 0.f, 0.f, 1.0f};
-
-    Material mat_stage = get_default_material();
-    mat_stage.color   = new GLfloat[3]{0, 122, 0};
-    mat_stage.ambient = new GLfloat[4]{0.5f, 0.5f, 0.5f, 1.0f}; 
     
     // Ceil & Floor
     meshes_.push_back(Mesh{ // Floor
@@ -53,13 +58,8 @@ void StageRoom::ready()
     meshes_.push_back(Mesh{ // Back-Stage Wall
          make_quad(4, -4, -.5, -4, -4, 2), mat_wall
     });
-    
-    // Stage-Bottom Up
-    meshes_.push_back(Mesh{ // Stage Step
-         make_quad(4, -2, -1, -4, -2, -.5), mat_stage
-    });
-    meshes_.push_back(Mesh{ // Stage Floor
-         make_quad(4, -2, -.5, -4, -4, -.5), mat_stage
-    });
+
+    tid_room = TextureBase::get_texture(TEXTURE_ROOM);
+    tid_metal = TextureBase::get_texture(TEXTURE_CYL);
 
 }

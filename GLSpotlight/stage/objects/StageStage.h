@@ -1,13 +1,11 @@
 ﻿#pragma once
-
 #include "StageObject.h"
 
-
-class StageRoom : public StageObject
+class StageStage : public StageObject
 {
 
-    unsigned int tid_room, tid_metal;
-
+    unsigned int tid_stage;
+    
 protected:
     void pre_render() override;
     void rendering() override;
@@ -15,4 +13,5 @@ protected:
 public:
     
     void ready() override;
+    
 };

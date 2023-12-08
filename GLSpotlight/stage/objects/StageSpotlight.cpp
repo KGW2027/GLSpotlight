@@ -3,6 +3,12 @@
 #include <thread>
 #include <glm/common.hpp>
 
+#include "../StageBuilder.h"
+#include "../textures/TextureBase.h"
+
+#define TEXTURE_CYL "Metal"
+#define TEXTURE_LHT "Spotlight"
+
 void StageSpotlight::pre_render()
 {
     StageObject::pre_render();
@@ -22,8 +28,14 @@ void StageSpotlight::rendering()
     rotate_[2] = 270 + yaw_offset_;
     
     calc_direction();
+
+    load_texture(true, tid_metal);
     draw_cylinder(vec3(0, 0, 1), vec3(0, -90, 0), 0.3f, 1.5f);
+    unload_texture();
+    
+    load_texture(false, tid_cam);
     draw_meshes(meshes_, 1);
+    unload_texture();
 }
 
 void StageSpotlight::post_render()
@@ -102,6 +114,9 @@ void StageSpotlight::ready()
     meshes_.push_back(Mesh{ // Wing Left
         make_quad(1, 1, -1, 1, 2, 1), mat_camera
     });
+
+    tid_cam = TextureBase::get_texture(TEXTURE_LHT);
+    tid_metal = TextureBase::get_texture(TEXTURE_CYL);
     
 }
 

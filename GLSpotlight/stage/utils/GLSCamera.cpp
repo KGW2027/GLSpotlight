@@ -25,13 +25,13 @@ void GLSCamera::update()
     
     float x_move = - MOUSE_SENSIVITY * (move_end_[0] - move_start_[0]) / width ;
     float y_move =   MOUSE_SENSIVITY * (move_end_[1] - move_start_[1]) / height;
-    rotate_camera(x_move, true);
-    rotate_camera(y_move, false);
+    // rotate_camera(x_move, true);
+    // rotate_camera(y_move, false);
     move_start_ = move_end_;
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45, width * 1.0 / height, 0.1, 20);
+    gluPerspective(60, width * 1.0 / height, 0.1, 20);
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

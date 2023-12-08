@@ -41,6 +41,8 @@ struct Mesh
 
 class StageObject
 {
+    const GLfloat *zero_ = new GLfloat[4]{.0f, .0f, .0f, 1.f}; 
+    
 protected:
     vec3 position_, rotate_, scale_;
     std::vector<Mesh> meshes_;
@@ -50,13 +52,18 @@ protected:
     void apply_material(GLenum face, Material mat);
     void apply_lightdata(LightSource light);
     void rotate_self(vec3 rotator);
+    void load_texture(bool is_auto_mapping, unsigned int texture_id);
+    void unload_texture();
+    void reset_material();
     float get_random();
     quad make_quad(float x1, float y1, float z1, float x2, float y2, float z2);
+    quad make_coord(float sx, float sy, float dx, float dy);
     GLfloat* get_rgba_by_ubyte(float red, float green, float blue, float alpha);
 #pragma endregion
 
 #pragma region Draw
     void draw_quad(quad q);
+    void draw_quad_with_coord(quad q, quad coord);
     void draw_meshes(std::vector<Mesh> meshes, int resolution_);
     void draw_cylinder(vec3 origin, vec3 rotate, float radius, float height);
 #pragma endregion 
@@ -64,7 +71,7 @@ protected:
 #pragma region Virtual
     virtual void pre_render();
     virtual void rendering() {  }
-    virtual void post_render() { glPopMatrix(); }
+    virtual void post_render() { glPopMatrix(); reset_material(); }
 #pragma endregion 
 
 public:
