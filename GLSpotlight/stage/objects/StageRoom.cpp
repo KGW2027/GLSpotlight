@@ -7,6 +7,10 @@ void StageRoom::pre_render()
 
 void StageRoom::rendering()
 {
+    // Spotlight Hanger
+    draw_cylinder(vec3(-1.77, -1.65, -3), vec3(0, 90, 0), 0.05f, 6);
+
+    
     draw_meshes(walls, 20);
 }
 
@@ -56,4 +60,5 @@ void StageRoom::ready()
     walls.push_back(Mesh{ // Stage Floor
          make_quad(4, -2, -.5, -4, -4, -.5), mat_stage
     });
+
 }
