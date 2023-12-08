@@ -12,6 +12,14 @@ enum Expect_Axis
     EXPECT_Z = 0x04
 };
 
+void StageObject::draw_quad(quad q)
+{
+    glBegin(GL_QUADS);
+    for(int idx = 0 ; idx < 4 ; idx++)
+        glVertex3f(q[idx][0], q[idx][1], q[idx][2]);
+    glEnd();
+}
+
 void StageObject::update_window_size()
 {
     window_size_[0] = static_cast<short>(glutGet(GLUT_WINDOW_WIDTH ));
@@ -67,6 +75,56 @@ void StageObject::apply_lightdata(LightSource light)
     glLightf (light.id, GL_CONSTANT_ATTENUATION, light.attenuation[0]);
     glLightf (light.id, GL_LINEAR_ATTENUATION, light.attenuation[1]);
     glLightf (light.id, GL_QUADRATIC_ATTENUATION, light.attenuation[2]);
+}
+
+void StageObject::draw_meshes(std::vector<Mesh> meshes, const int resolution_)
+{
+    // 분할 해상도 (resolution_ 이 20일 경우, 면을 20x20으로 분할)
+    float resolution = 1.f / static_cast<float>(resolution_);
+    
+    for(Mesh mesh : meshes)
+    {
+        // 최소좌표, 최대자표를 얻는다.
+        float min_pos[3] = {9999, 9999, 9999}, max_pos[3] = {-9999, -9999, -9999};
+        for(int pidx = 0 ; pidx < 4 ; pidx++)
+        {
+            for(int idx = 0 ; idx < 3 ; idx++)
+            {
+                min_pos[idx] = std::min(min_pos[idx], mesh.points[pidx][idx]);
+                max_pos[idx] = std::max(max_pos[idx], mesh.points[pidx][idx]);
+            }
+        }
+
+        // 최소좌표 최대좌표로 Mesh의 구성점과 구성면을 얻는다.
+        std::vector<int> indices;
+        int expect = -1;
+        for(int idx = 0 ; idx < 3 ; idx++)
+        {
+            if(min_pos[idx] == max_pos[idx])
+                expect = idx;
+            else 
+                indices.push_back(idx);
+        }
+
+        // Material 적용
+        apply_material(GL_FRONT_AND_BACK, mesh.material);
+        
+        // 입력된 해상도 값에 따라 Draw
+        for(float p1 = min_pos[indices[0]] ; p1 <= max_pos[indices[0]] ; p1 += resolution)
+        {
+            for(float p2 = min_pos[indices[1]] ; p2 <= max_pos[indices[1]] ; p2 += resolution)
+            {
+                quad q = expect == 0 ? make_quad(min_pos[0], p1, p2, min_pos[0], p1 + resolution, p2 + resolution)
+                       : expect == 1 ? make_quad(p1, min_pos[1], p2, p1 + resolution, min_pos[1], p2 + resolution)
+                       : expect == 2 ? make_quad(p1, p2, min_pos[2], p1 + resolution, p2 + resolution, min_pos[2])
+                       : nullptr;
+                if(q == nullptr) continue;
+                
+                draw_quad(q);
+            }
+        }
+    }
+    
 }
 
 GLfloat* StageObject::get_rgba_by_ubyte(float red, float green, float blue, float alpha)

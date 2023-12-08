@@ -59,11 +59,16 @@ StageSpotlight::StageSpotlight(GLenum light_source)
 void StageSpotlight::ready()
 {
     StageObject::ready();
-    
+
+    // 조명 광원 세팅
     calc_direction();
     apply_lightdata(light_data_);
 
     yaw_offset_ = 0;
     yaw_direction_ = get_random() > 0.5f ? 1 : -1;
+
+    // 조명 Body 세팅
+    
+    
 }
 

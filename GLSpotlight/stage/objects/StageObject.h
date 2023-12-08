@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <vector>
 #include <windows.h>
 #include <GL/gl.h>
 #include <glm/glm.hpp>
@@ -33,9 +34,16 @@ struct Material
     float   shininess; // 광택 계수
 };
 
+struct Mesh
+{
+    quad        points   ; // Mesh를 구성하는 vertex 집합
+    Material    material ; // Mesh의 머테리얼
+};
 
 class StageObject
 {
+
+    void draw_quad(quad q);
     
 protected:
     vec3 position_, rotate_, scale_;
@@ -47,6 +55,7 @@ protected:
     void color_rgb(float r, float g, float b);
     void apply_material(GLenum face, Material mat);
     void apply_lightdata(LightSource light);
+    void draw_meshes(std::vector<Mesh> meshes, int resolution_);
 
     GLfloat* get_rgba_by_ubyte(float red, float green, float blue, float alpha);
 
