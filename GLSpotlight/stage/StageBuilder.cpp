@@ -96,9 +96,9 @@ void StageBuilder::start()
     render_lights_.push_back(new StageSpotlight(GL_LIGHT0));
     render_lights_.push_back(new StageSpotlight(GL_LIGHT1));
     render_lights_.push_back(new StageSpotlight(GL_LIGHT2));
-    render_lights_[0]->add_position(0, -1.8f, 1.8f);
-    render_lights_[1]->add_position(2, -1.8f, 1.8f);
-    render_lights_[2]->add_position(-2, -1.8f, 1.8f);
+    render_lights_[0]->add_position(0, -1.8f, 1.6f);
+    render_lights_[1]->add_position(2, -1.8f, 1.6f);
+    render_lights_[2]->add_position(-2, -1.8f, 1.6f);
     add_render_objects(render_lights_[0]);
     add_render_objects(render_lights_[1]);
     add_render_objects(render_lights_[2]);

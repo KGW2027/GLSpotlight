@@ -20,6 +20,13 @@ void StageObject::draw_quad(quad q)
     glEnd();
 }
 
+void StageObject::rotate_self(vec3 rotator)
+{
+    glRotatef(rotator[0], 1, 0, 0);
+    glRotatef(rotator[1], 0, 1, 0);
+    glRotatef(rotator[2], 0, 0, 1);
+}
+
 void StageObject::update_window_size()
 {
     window_size_[0] = static_cast<short>(glutGet(GLUT_WINDOW_WIDTH ));
@@ -80,7 +87,7 @@ void StageObject::apply_lightdata(LightSource light)
 void StageObject::draw_meshes(std::vector<Mesh> meshes, const int resolution_)
 {
     // 분할 해상도 (resolution_ 이 20일 경우, 면을 20x20으로 분할)
-    float resolution = 1.f / static_cast<float>(resolution_);
+    float p1_res, p2_res;
     
     for(Mesh mesh : meshes)
     {
@@ -100,23 +107,30 @@ void StageObject::draw_meshes(std::vector<Mesh> meshes, const int resolution_)
         int expect = -1;
         for(int idx = 0 ; idx < 3 ; idx++)
         {
-            if(min_pos[idx] == max_pos[idx])
+            if(min_pos[idx] == max_pos[idx] && expect == -1)
                 expect = idx;
             else 
                 indices.push_back(idx);
         }
 
+        p1_res  = std::max(0.05f, (max_pos[indices[0]] - min_pos[indices[0]]) / static_cast<float>(resolution_));
+        p2_res  = std::max(0.05f, (max_pos[indices[1]] - min_pos[indices[1]]) / static_cast<float>(resolution_));
+
         // Material 적용
         apply_material(GL_FRONT_AND_BACK, mesh.material);
         
         // 입력된 해상도 값에 따라 Draw
-        for(float p1 = min_pos[indices[0]] ; p1 <= max_pos[indices[0]] ; p1 += resolution)
+        for(float p1 = min_pos[indices[0]] ; p1 < max_pos[indices[0]] ; p1 += p1_res)
         {
-            for(float p2 = min_pos[indices[1]] ; p2 <= max_pos[indices[1]] ; p2 += resolution)
+            for(float p2 = min_pos[indices[1]] ; p2 < max_pos[indices[1]] ; p2 += p2_res)
             {
-                quad q = expect == 0 ? make_quad(min_pos[0], p1, p2, min_pos[0], p1 + resolution, p2 + resolution)
-                       : expect == 1 ? make_quad(p1, min_pos[1], p2, p1 + resolution, min_pos[1], p2 + resolution)
-                       : expect == 2 ? make_quad(p1, p2, min_pos[2], p1 + resolution, p2 + resolution, min_pos[2])
+                float margin = 0.00f;
+                float s1 = p1 - margin, s2 = p2 - margin;
+                float e1 = p1 + p1_res + margin, e2 = p2 + p2_res + margin;
+                
+                quad q = expect == 0 ? make_quad(min_pos[0], s1, s2, min_pos[0], e1, e2)
+                       : expect == 1 ? make_quad(s1, min_pos[1], s2, e1, min_pos[1], e2)
+                       : expect == 2 ? make_quad(s1, s2, min_pos[2], e1, e2, min_pos[2])
                        : nullptr;
                 if(q == nullptr) continue;
                 
@@ -125,6 +139,15 @@ void StageObject::draw_meshes(std::vector<Mesh> meshes, const int resolution_)
         }
     }
     
+}
+
+void StageObject::draw_cylinder(vec3 origin, vec3 rotate, float radius, float height)
+{
+    glPushMatrix();
+    rotate_self(rotate);
+    glTranslatef(origin[0], origin[1], origin[2]);
+    glutSolidCylinder(radius, height, 10, 6);
+    glPopMatrix();
 }
 
 GLfloat* StageObject::get_rgba_by_ubyte(float red, float green, float blue, float alpha)
@@ -139,9 +162,7 @@ void StageObject::pre_render()
 {
     glPushMatrix();
     glTranslatef(position_[0], position_[1], position_[2]);
-    glRotatef(rotate_[0], 1, 0, 0);
-    glRotatef(rotate_[1], 0, 1, 0);
-    glRotatef(rotate_[2], 0, 0, 1);
+    rotate_self(rotate_);
     glScalef(scale_[0], scale_[1], scale_[2]);
 }
 

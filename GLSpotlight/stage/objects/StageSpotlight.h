@@ -16,7 +16,6 @@ class StageSpotlight : public StageObject
     void post_render() override;
 
     void calc_direction();
-    void draw_body();
 public:
     StageSpotlight(GLenum light_source);
 

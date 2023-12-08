@@ -44,18 +44,27 @@ class StageObject
 {
 
     void draw_quad(quad q);
+    void rotate_self(vec3 rotator);
     
 protected:
     vec3 position_, rotate_, scale_;
     size2d window_size_;
+
     
     void update_window_size();
     void gl_pos_to_glut_pos(affine gl_pos);
     void glut_pos_to_gl_pos(affine glut_pos);
+
+#pragma region Settings
     void color_rgb(float r, float g, float b);
     void apply_material(GLenum face, Material mat);
     void apply_lightdata(LightSource light);
+#pragma endregion
+
+#pragma region Draw
     void draw_meshes(std::vector<Mesh> meshes, int resolution_);
+    void draw_cylinder(vec3 origin, vec3 rotate, float radius, float height);
+#pragma endregion 
 
     GLfloat* get_rgba_by_ubyte(float red, float green, float blue, float alpha);
 

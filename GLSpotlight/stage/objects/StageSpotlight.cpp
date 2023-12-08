@@ -23,7 +23,8 @@ void StageSpotlight::rendering()
     rotate_[2] = 270 + yaw_offset_;
     
     calc_direction();
-    draw_body();
+    draw_cylinder(vec3(0, 0, 1), vec3(0, -90, 0), 0.3f, 1.5f);
+    draw_meshes(body_meshes_, 1);
 }
 
 void StageSpotlight::post_render()
@@ -37,11 +38,6 @@ void StageSpotlight::calc_direction()
     glLightfv(light_data_.id, GL_SPOT_DIRECTION, new GLfloat[3]{1, 0, 0});
 }
 
-void StageSpotlight::draw_body()
-{
-    
-}
-
 StageSpotlight::StageSpotlight(GLenum light_source)
 {
     light_data_ = get_default_light_source();
@@ -53,7 +49,6 @@ StageSpotlight::StageSpotlight(GLenum light_source)
     light_data_.exponent = 15.0f;
     
     rotate_[0] = 60;
-    rotate_[2] = 270;
 }
 
 void StageSpotlight::ready()
@@ -68,7 +63,46 @@ void StageSpotlight::ready()
     yaw_direction_ = get_random() > 0.5f ? 1 : -1;
 
     // 조명 Body 세팅
+    scale_ = {0.075, 0.075, 0.075};
+    Material mat_camera = get_default_material();
+    mat_camera.color   = get_rgba_by_ubyte(0, 0, 0, 1.0);
+    mat_camera.ambient = new GLfloat[4]{0.3f, 0.3f, 0.3f, 1.0f};
+
+    body_meshes_.push_back(Mesh{ // Downward
+        make_quad(-1, -1, -1, 1, 1, -1), mat_camera
+    });
+
+    body_meshes_.push_back(Mesh{ // Upward
+        make_quad(-1, -1, 1, 1, 1, 1), mat_camera
+    });
+
+    body_meshes_.push_back(Mesh{ // Right
+        make_quad(-1, -1, -1, 1, -1, 1), mat_camera
+    });
     
+    body_meshes_.push_back(Mesh{ // Left
+        make_quad(-1, 1, -1, 1, 1, 1), mat_camera
+    });
+
+    body_meshes_.push_back(Mesh{ // Back
+        make_quad(-1, -1, -1, -1, 1, 1), mat_camera
+    });
+    
+    body_meshes_.push_back(Mesh{ // Wing_Top
+        make_quad(1, 1, -1, 1, -1, -2), mat_camera
+    });
+    
+    body_meshes_.push_back(Mesh{ // Wing_Bottom
+        make_quad(1, 1, 1, 1, -1, 2), mat_camera
+    });
+    
+    body_meshes_.push_back(Mesh{ // Wing Right
+        make_quad(1, -1, -1, 1, -2, 1), mat_camera
+    });
+    
+    body_meshes_.push_back(Mesh{ // Wing Left
+        make_quad(1, 1, -1, 1, 2, 1), mat_camera
+    });
     
 }
 
