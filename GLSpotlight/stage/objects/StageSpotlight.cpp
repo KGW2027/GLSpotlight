@@ -24,7 +24,7 @@ void StageSpotlight::rendering()
     
     calc_direction();
     draw_cylinder(vec3(0, 0, 1), vec3(0, -90, 0), 0.3f, 1.5f);
-    draw_meshes(body_meshes_, 1);
+    draw_meshes(meshes_, 1);
 }
 
 void StageSpotlight::post_render()
@@ -68,39 +68,39 @@ void StageSpotlight::ready()
     mat_camera.color   = get_rgba_by_ubyte(0, 0, 0, 1.0);
     mat_camera.ambient = new GLfloat[4]{0.3f, 0.3f, 0.3f, 1.0f};
 
-    body_meshes_.push_back(Mesh{ // Downward
+    meshes_.push_back(Mesh{ // Downward
         make_quad(-1, -1, -1, 1, 1, -1), mat_camera
     });
 
-    body_meshes_.push_back(Mesh{ // Upward
+    meshes_.push_back(Mesh{ // Upward
         make_quad(-1, -1, 1, 1, 1, 1), mat_camera
     });
 
-    body_meshes_.push_back(Mesh{ // Right
+    meshes_.push_back(Mesh{ // Right
         make_quad(-1, -1, -1, 1, -1, 1), mat_camera
     });
     
-    body_meshes_.push_back(Mesh{ // Left
+    meshes_.push_back(Mesh{ // Left
         make_quad(-1, 1, -1, 1, 1, 1), mat_camera
     });
 
-    body_meshes_.push_back(Mesh{ // Back
+    meshes_.push_back(Mesh{ // Back
         make_quad(-1, -1, -1, -1, 1, 1), mat_camera
     });
     
-    body_meshes_.push_back(Mesh{ // Wing_Top
+    meshes_.push_back(Mesh{ // Wing_Top
         make_quad(1, 1, -1, 1, -1, -2), mat_camera
     });
     
-    body_meshes_.push_back(Mesh{ // Wing_Bottom
+    meshes_.push_back(Mesh{ // Wing_Bottom
         make_quad(1, 1, 1, 1, -1, 2), mat_camera
     });
     
-    body_meshes_.push_back(Mesh{ // Wing Right
+    meshes_.push_back(Mesh{ // Wing Right
         make_quad(1, -1, -1, 1, -2, 1), mat_camera
     });
     
-    body_meshes_.push_back(Mesh{ // Wing Left
+    meshes_.push_back(Mesh{ // Wing Left
         make_quad(1, 1, -1, 1, 2, 1), mat_camera
     });
     

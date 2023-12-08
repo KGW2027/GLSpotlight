@@ -10,8 +10,8 @@ void StageRoom::rendering()
     // Spotlight Hanger
     draw_cylinder(vec3(-1.77, -1.65, -3), vec3(0, 90, 0), 0.05f, 6);
 
-    
-    draw_meshes(walls, 20);
+    // Draw Room
+    draw_meshes(meshes_, 20);
 }
 
 void StageRoom::post_render()
@@ -32,32 +32,32 @@ void StageRoom::ready()
     mat_stage.ambient = new GLfloat[4]{0.5f, 0.5f, 0.5f, 1.0f}; 
     
     // Ceil & Floor
-    walls.push_back(Mesh{ // Floor
+    meshes_.push_back(Mesh{ // Floor
         make_quad(-4, -2, -1, 4, 2, -1), mat_wall
     });
-    walls.push_back(Mesh{ // Ceil
+    meshes_.push_back(Mesh{ // Ceil
          make_quad(-4, 2, 2, 4, -4, 2), mat_wall
     });
 
     // Side Walls
-    walls.push_back(Mesh{ // Entrance Wall (Camera Side)
+    meshes_.push_back(Mesh{ // Entrance Wall (Camera Side)
     make_quad(4, 2, 2, -4, 2, -1), mat_wall
     });
-    walls.push_back(Mesh{ // Left Wall
+    meshes_.push_back(Mesh{ // Left Wall
          make_quad(4, -4, 2, 4, 2, -1), mat_wall
     });
-    walls.push_back(Mesh{ // Right Wall
+    meshes_.push_back(Mesh{ // Right Wall
          make_quad(-4, 2, 2, -4, -4, -1), mat_wall
     });
-    walls.push_back(Mesh{ // Back-Stage Wall
+    meshes_.push_back(Mesh{ // Back-Stage Wall
          make_quad(4, -4, -.5, -4, -4, 2), mat_wall
     });
     
     // Stage-Bottom Up
-    walls.push_back(Mesh{ // Stage Step
+    meshes_.push_back(Mesh{ // Stage Step
          make_quad(4, -2, -1, -4, -2, -.5), mat_stage
     });
-    walls.push_back(Mesh{ // Stage Floor
+    meshes_.push_back(Mesh{ // Stage Floor
          make_quad(4, -2, -.5, -4, -4, -.5), mat_stage
     });
 

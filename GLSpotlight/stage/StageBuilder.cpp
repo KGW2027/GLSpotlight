@@ -58,7 +58,7 @@ void mouse_wheel_event(int arg1, int arg2, int arg3, int arg4)
 
 void StageBuilder::init()
 {
-    // waver = new StageWaver(L"../test5.wav");
+    waver = new StageWaver(L"../test5.wav");
     camera_ = new GLSCamera();
 }
 
@@ -90,7 +90,7 @@ void StageBuilder::start()
     add_render_objects(new StageRoom());
     
     // Spectrum Render 오브젝트 실행
-    // add_render_objects(waver);
+    add_render_objects(waver);
 
     // Light Sources
     render_lights_.push_back(new StageSpotlight(GL_LIGHT0));

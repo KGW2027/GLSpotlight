@@ -20,10 +20,11 @@ struct music_processor
 
 class StageWaver : public StageObject
 {
-    const wchar_t   *path_         ;
-    MusicReader     *music_reader_ ;
-    music_processor m_processor_   ;
-    draw_data       draw_data_     ;
+    const wchar_t       *path_         ;
+    MusicReader         *music_reader_ ;
+    music_processor     m_processor_   ;
+    draw_data           draw_data_     ;
+    Material            mat_freq_      ;
 
     void pre_render() override;
     void rendering() override;

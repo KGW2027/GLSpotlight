@@ -43,12 +43,12 @@ struct Mesh
 class StageObject
 {
 
-    void draw_quad(quad q);
     void rotate_self(vec3 rotator);
     
 protected:
     vec3 position_, rotate_, scale_;
     size2d window_size_;
+    std::vector<Mesh> meshes_;
 
     
     void update_window_size();
@@ -62,6 +62,7 @@ protected:
 #pragma endregion
 
 #pragma region Draw
+    void draw_quad(quad q);
     void draw_meshes(std::vector<Mesh> meshes, int resolution_);
     void draw_cylinder(vec3 origin, vec3 rotate, float radius, float height);
 #pragma endregion 
