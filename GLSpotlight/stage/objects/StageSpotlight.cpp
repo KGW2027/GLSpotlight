@@ -53,8 +53,6 @@ StageSpotlight::StageSpotlight(GLenum light_source)
 {
     light_data_ = get_default_light_source();
     light_data_.id = light_source;
-    // light_data_.ambient  = get_rgba_by_ubyte(0, 0, 0, 1.0);
-    // light_data_.specular = get_rgba_by_ubyte(255, 255, 255, 1.0);
     light_data_.diffuse  = get_rgba_by_ubyte(255, 255, 255, 1.0);
     light_data_.cut_off  = 40.0f;
     light_data_.exponent = 15.0f;
@@ -76,7 +74,7 @@ void StageSpotlight::ready()
     // 조명 Body 세팅
     scale_ = {0.075, 0.075, 0.075};
     Material mat_camera = get_default_material();
-    mat_camera.color   = get_rgba_by_ubyte(0, 0, 0, 1.0);
+    mat_camera.color   = get_rgba_by_ubyte(44, 44, 44, 1.0);
     mat_camera.ambient = new GLfloat[4]{0.3f, 0.3f, 0.3f, 1.0f};
 
     meshes_.push_back(Mesh{ // Downward

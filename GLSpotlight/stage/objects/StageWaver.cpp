@@ -5,6 +5,8 @@
 #include <thread>
 #include <glm/common.hpp>
 
+#include "../StageBuilder.h"
+
 
 StageWaver::StageWaver(const wchar_t* wav_path) : music_reader_(nullptr), m_processor_(), draw_data_(nullptr)
 {
@@ -15,7 +17,7 @@ StageWaver::StageWaver(const wchar_t* wav_path) : music_reader_(nullptr), m_proc
 void StageWaver::ready()
 {
     position_[1] = -3.95f;
-    position_[2] = 0.5f;
+    position_[2] = 0.6f;
     scale_ = {.8f, .8f, .8f};
     
     // Play Spectrum Render
@@ -28,7 +30,7 @@ void StageWaver::ready()
 
     std::thread music_thread(&MusicReader::play_music, music_reader_);
     music_thread.detach();
-
+    
     // Background
     Material mat_back = get_default_material();
     mat_back.color = get_rgba_by_ubyte(0, 0, 0, 1.0);
@@ -38,8 +40,6 @@ void StageWaver::ready()
 
     mat_freq_ = get_default_material();
     mat_freq_.color = get_rgba_by_ubyte(182, 231, 255, 1.0f);
-    mat_freq_.emission = get_rgba_by_ubyte(0, 0, 255, 0.1f);
-    mat_freq_.shininess = .1f;
 }
 
 void StageWaver::pre_render()
@@ -97,16 +97,12 @@ void StageWaver::process_frame()
 
 void StageWaver::render_3d()
 {
-    // 배경 생성
-    // draw_meshes(meshes_, 10);
-
-    glTranslatef(0, 0, 0.1f);
     apply_material(GL_FRONT_AND_BACK, mat_freq_);
-    float dx = 6.0f / static_cast<float>(m_processor_.shape[1]);
+    float dx = 9.0f / static_cast<float>(m_processor_.shape[1]);
     for(uint i = 0 ; i < m_processor_.shape[1] ; i++)
     {
         float norm_value = glm::clamp(abs(static_cast<float>(draw_data_[i] / 80.)), 0.f, 1.f) * 0.9f;
-        float sx = -3.f + dx * i, ex = sx + dx;
+        float sx = -4.5f + dx * i, ex = sx + dx;
         quad q = make_quad(sx, 0.01f, -norm_value, ex, 0.01f, norm_value);
         draw_quad(q);
     }

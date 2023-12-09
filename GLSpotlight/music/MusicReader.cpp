@@ -11,7 +11,7 @@
 #include "FourierLib.h"
 #include "ParseLogger.h"
 
-#define P_Integ_L 20854
+#define P_Integ_L 17292
 #define P_Integ_S 1025
 
 // Audio Play : https://stackoverflow.com/questions/65412545/how-to-increase-mp3-decoding-quality-media-foundation
@@ -26,22 +26,22 @@ MusicReader::MusicReader(const wchar_t* path) : data_(nullptr), data_len_(0), is
     // Read Audio Data
     read_file();
     
-    // Experiment - Pycharm STFT Result export Integration [ wav5 - (20854, 1025), wav4 - (25423, 1025)]
-    const char    *file_path   = "F:/P_Programming/P_python/economyPract/export-stft.txt";
-          double  **parse_arr  = new double*[0];
-    
-    FILE*   file;
-    if(!fopen_s(&file, file_path, "r"))
-        parse_arr = experiment_read_line(file);
-    
-    dB_In db_cvt;
-    db_cvt.frame_count = P_Integ_L;
-    db_cvt.window_size = P_Integ_S;
-    db_cvt.top_dB      = 80.;
-    db_cvt.in          = parse_arr;
-    dB_Out db_out      = FourierLib::amp_to_dB(db_cvt);
-    result_     = db_out.out;
-    num_chunks_ = db_out.size[1];
+    // Experiment - Pycharm STFT Result export Integration [ wav5 - (20854), wav4 - (25423), wav6 - (17292) ]
+    // const char    *file_path   = "F:/P_Programming/P_python/economyPract/export-stft-wav6.txt";
+    //       double  **parse_arr  = new double*[0];
+    //
+    // FILE*   file;
+    // if(!fopen_s(&file, file_path, "r"))
+    //     parse_arr = experiment_read_line(file);
+    //
+    // dB_In db_cvt;
+    // db_cvt.frame_count = P_Integ_L;
+    // db_cvt.window_size = P_Integ_S;
+    // db_cvt.top_dB      = 80.;
+    // db_cvt.in          = parse_arr;
+    // dB_Out db_out      = FourierLib::amp_to_dB(db_cvt);
+    // result_     = db_out.out;
+    // num_chunks_ = db_out.size[1];
 
     // Experiment - Pycharm Music Parse Integration
     // const char  *file_path  = "F:/P_Programming/P_python/economyPract/export-wav4.txt";
@@ -50,21 +50,21 @@ MusicReader::MusicReader(const wchar_t* path) : data_(nullptr), data_len_(0), is
     
     //
     // STFT DATA
-    // STFT_Setting stft;
-    // stft.hop_len = HOP_SIZE;
-    // stft.win_len = WINDOW_SIZE;
-    // stft.in = data_;
-    // stft.in_len = data_len_;
-    // STFT_Out out = FourierLib::stft(stft);
-    //
-    // dB_In db_cvt;
-    // db_cvt.frame_count = out.size[1];
-    // db_cvt.window_size = out.size[0];
-    // db_cvt.top_dB = 80.;
-    // db_cvt.in = out.out;
-    // dB_Out db_out = FourierLib::amp_to_dB(db_cvt);
-    // result_     = db_out.out;
-    // num_chunks_ = db_out.size[1];
+    STFT_Setting stft;
+    stft.hop_len = HOP_SIZE;
+    stft.win_len = WINDOW_SIZE;
+    stft.in = data_;
+    stft.in_len = data_len_;
+    STFT_Out out = FourierLib::stft(stft);
+    
+    dB_In db_cvt;
+    db_cvt.frame_count = out.size[1];
+    db_cvt.window_size = out.size[0];
+    db_cvt.top_dB = 80.;
+    db_cvt.in = out.out;
+    dB_Out db_out = FourierLib::amp_to_dB(db_cvt);
+    result_     = db_out.out;
+    num_chunks_ = db_out.size[1];
 
     // dB Parse : -80, -57.2536
     // norm parse : -80, -41.6194

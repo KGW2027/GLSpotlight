@@ -8,6 +8,7 @@
 #include "utils/GLSCamera.h"
 #include "StageBuilder.h"
 
+#include "objects/StageCurtain.h"
 #include "objects/StageStage.h"
 #include "textures/TextureBase.h"
 
@@ -67,7 +68,7 @@ void mouse_wheel_event(int arg1, int arg2, int arg3, int arg4)
 
 void StageBuilder::init()
 {
-    waver = new StageWaver(L"../test5.wav");
+    waver = new StageWaver(L"../test6.wav");
     camera_ = new GLSCamera();
 }
 
@@ -98,11 +99,11 @@ void StageBuilder::load_textures()
     TextureBase::load_texture("../textures/spotlight.png", "Spotlight");
     TextureBase::load_texture("../textures/metal.png", "Metal");
     TextureBase::load_texture("../textures/room.png", "Room");
+    TextureBase::load_texture("../textures/curtain.png", "Curtain");
 }
 
-void StageBuilder::start()
+void StageBuilder::load_objects()
 {
-    load_textures();
     
     // Building Wall Add
     add_render_objects(new StageRoom());
@@ -110,6 +111,12 @@ void StageBuilder::start()
     
     // Spectrum Render 오브젝트 실행
     add_render_objects(waver);
+
+    // Curtain Add
+    StageCurtain *left = new StageCurtain(), *right = new StageCurtain();
+    left->set_direction(false); right->set_direction(true);
+    add_render_objects(left);
+    add_render_objects(right);
 
     // Light Sources
     render_lights_.push_back(new StageSpotlight(GL_LIGHT0));
@@ -121,6 +128,12 @@ void StageBuilder::start()
     add_render_objects(render_lights_[0]);
     add_render_objects(render_lights_[1]);
     add_render_objects(render_lights_[2]);
+}
+
+void StageBuilder::start()
+{
+    load_textures();
+    load_objects();
 
     // OpenGL 액션 시작
     glewInit();
@@ -138,8 +151,8 @@ void StageBuilder::start()
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     
-    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     
     glutMainLoop();
 }
