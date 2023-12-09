@@ -68,6 +68,13 @@ void StageObject::reset_material()
     
 }
 
+void StageObject::clear_gc()
+{
+    for(quad q : gc)
+        free(q);
+    gc.clear();
+}
+
 /**
  * \brief 0~255의 데이터를 받아 0~1 구간으로 변환 후 색으로 적용
  * \param r Red Color value (0-255)
@@ -288,6 +295,8 @@ void StageObject::draw_quad(quad q)
     for(int idx = 0 ; idx < 4 ; idx++)
         glVertex3f(q[idx][0], q[idx][1], q[idx][2]);
     glEnd();
+
+    gc.push_back(q);
 }
 
 /**
@@ -304,6 +313,9 @@ void StageObject::draw_quad_with_coord(quad q, quad coord)
         glVertex3f(q[idx][0], q[idx][1], q[idx][2]);
     }
     glEnd();
+
+    gc.push_back(q);
+    gc.push_back(coord);
 }
 
 #pragma endregion

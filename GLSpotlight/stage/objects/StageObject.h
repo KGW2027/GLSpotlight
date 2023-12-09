@@ -41,7 +41,10 @@ struct Mesh
 
 class StageObject
 {
-    const GLfloat *zero_ = new GLfloat[4]{.0f, .0f, .0f, 1.f}; 
+    const GLfloat *zero_ = new GLfloat[4]{.0f, .0f, .0f, 1.f};
+    std::vector<quad> gc;
+
+    void clear_gc();
     
 protected:
     vec3 position_, rotate_, scale_;
@@ -71,7 +74,7 @@ protected:
 #pragma region Virtual
     virtual void pre_render();
     virtual void rendering() {  }
-    virtual void post_render() { glPopMatrix(); reset_material(); }
+    virtual void post_render() { glPopMatrix(); reset_material(); clear_gc(); }
 #pragma endregion 
 
 public:
