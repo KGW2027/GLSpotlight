@@ -32,10 +32,12 @@ void GLSCamera::update()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(60, width * 1.0 / height, 0.1, 20);
+    perspective_ = glm::perspective(glm::radians(60.0), width * 1.0 / height, 0.1, 20.0);
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(eye_[0], eye_[1], eye_[2], at_[0], at_[1], at_[2], up_[0], up_[1], up_[2]);
+    view_ = lookAt(eye_, at_, up_);
 }
 
 void GLSCamera::mouse_click(int button, int state, int x, int y)

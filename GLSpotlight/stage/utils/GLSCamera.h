@@ -17,6 +17,9 @@ class GLSCamera
     vec3    up_;
     vec3    forward_;
     vec3    right_;
+
+    mat4    perspective_;
+    mat4    view_;
     
     float   arm;
 
@@ -49,9 +52,10 @@ public:
     }
 
     void update();
-
     void mouse_click(int button, int state, int x, int y);
     void mouse_move(int x, int y);
     void mouse_wheel(int unk, int direction, int x, int y);
-    
+
+    glm::mat4 get_perspective() { return perspective_; }
+    glm::mat4 get_lookAt() { return view_; }
 };

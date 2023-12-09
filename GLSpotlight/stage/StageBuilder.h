@@ -32,5 +32,5 @@ public:
     static std::vector<StageObject*> get_render_objects() { return render_objects_; }
     static void add_render_objects(StageObject* obj);
     static GLSCamera* get_camera() { return camera_; }
-    static void set_light_mode(bool is_enable);
+    static void set_curtain_mode(bool is_opened);
 };

@@ -15,7 +15,7 @@ void StageRoom::rendering()
     // Spotlight Hanger
     
     load_texture(true, tid_metal);
-    draw_cylinder(vec3(-1.77, -1.65, -3), vec3(0, 90, 0), 0.05f, 6);
+    draw_cylinder(vec3(-1.77, -1.65, -3), vec3(0, 90, 0), 0.05f, 8);
     unload_texture();
 
     // Draw Room

@@ -51,16 +51,50 @@ void interval(int v)
 void mouse_move_event(int arg1, int arg2)
 {
     StageBuilder::get_camera()->mouse_move(arg1, arg2);
+    for(StageObject* object : StageBuilder::get_render_objects())
+    {
+        if(GLSPhysics* physObj = dynamic_cast<GLSPhysics*>(object))
+        {
+            physObj->move_force(ivec2(arg1, arg2));
+        }
+    }
 }
 
 void mouse_click_event(int arg1, int arg2, int arg3, int arg4)
 {
     StageBuilder::get_camera()->mouse_click(arg1, arg2, arg3, arg4);
+
+    if(arg1 == GLUT_LEFT_BUTTON)
+    {
+        for(StageObject* object : StageBuilder::get_render_objects())
+        {
+            if(GLSPhysics* physObj = dynamic_cast<GLSPhysics*>(object))
+            {
+                if(arg2 == GLUT_DOWN)
+                    physObj->start_physics(ivec2(arg3, arg4));
+                else if(arg2 == GLUT_UP)
+                    physObj->end_physics();
+            }
+        }
+    }
 }
 
 void mouse_wheel_event(int arg1, int arg2, int arg3, int arg4)
 {
     StageBuilder::get_camera()->mouse_wheel(arg1, arg2, arg3, arg4);
+}
+
+void keyboard_event(unsigned char arg1, int arg2, int arg3)
+{
+    switch(arg1)
+    {
+    case '1':
+        StageBuilder::set_curtain_mode(true);
+        break;
+    case '2':
+        StageBuilder::set_curtain_mode(false);
+        break;
+    }
 }
 
 #pragma endregion 
@@ -89,6 +123,7 @@ StageBuilder::StageBuilder(int argc, char* argv[])
     glutMouseFunc(mouse_click_event);
     glutMotionFunc(mouse_move_event);
     glutMouseWheelFunc(mouse_wheel_event);
+    glutKeyboardFunc(keyboard_event);
     glutTimerFunc(timer_tick, interval, 0);
     
 }
@@ -161,5 +196,17 @@ void StageBuilder::add_render_objects(StageObject* obj)
 {
     obj->ready();
     render_objects_.push_back(obj);
+}
+
+void StageBuilder::set_curtain_mode(bool is_opened)
+{
+    for(StageObject* object : get_render_objects())
+    {
+        if(StageCurtain* curtain = dynamic_cast<StageCurtain*>(object))
+        {
+            if(is_opened) curtain->open_curtain();
+            else          curtain->close_curtain();  
+        }
+    }
 }
 
