@@ -241,10 +241,12 @@ void MusicReader::play_music()
     MFCreateSinkWriterFromMediaSink(media_sink, nullptr, &writer);
     writer->SetInputMediaType(0, input_type, nullptr);
 
-    writer->BeginWriting();
     UINT32* shape = new UINT32[2];
     output(shape, nullptr, nullptr);
 
+    auto now_time  = std::chrono::high_resolution_clock::now();
+    writer->BeginWriting();
+    
     // Source에서 샘플 읽기
     while (!is_terminated_)
     {
@@ -261,6 +263,7 @@ void MusicReader::play_music()
         // Sample이 EOS라면 종료한다.
         if (streamFlags & MF_SOURCE_READERF_ENDOFSTREAM)
         {
+            printf("NOTIFY END OF SEGMENT\n");
             writer->NotifyEndOfSegment(0);
             break;
         }
@@ -271,13 +274,17 @@ void MusicReader::play_music()
         
         // Stream에 Sample을 입력한다. (재생)
         writer->WriteSample(0, sample);
+
+        now_time += std::chrono::nanoseconds(timestamp / 100);
+        std::this_thread::sleep_until(now_time);
     }
     
     writer->Release();
     writer->Finalize();
 
     MFShutdown();
-
+    delete[] shape;
+    
     is_playing_ = false;
 }
 
