@@ -1,6 +1,7 @@
 ﻿#include "GLSPhysics.h"
 
-#include <gl/glew.h>
+#include <windows.h>
+#include <GL/gl.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include "GLSCamera.h"
 #include "../StageBuilder.h"
@@ -28,18 +29,18 @@ vec3 GLSPhysics::screen_to_view(screen_pos position)
     mat4 view       = camera->get_lookAt();
     
     vec3 win_pos    = vec3(position[0], position[1], 0);
-    vec3 near       = unProject(win_pos, mat4(1.0f) * view, projection, viewport);
+    vec3 nnear       = unProject(win_pos, mat4(1.0f) * view, projection, viewport);
     win_pos.z = 1.0f;
-    vec3 far        = unProject(win_pos, mat4(1.0f) * view, projection, viewport);
+    vec3 ffar        = unProject(win_pos, mat4(1.0f) * view, projection, viewport);
 
-    float t = (-2.0f - near.y) / (far.y - near.y);
-    return near + t * (far - near);
+    float t = (-2.0f - nnear.y) / (ffar.y - nnear.y);
+    return nnear + t * (ffar - nnear);
 }
 
 float GLSPhysics::distance_from_point(vec3 point, float check_x)
 {
     // 커튼을 지나가지 않으면 PASS
-    if(std::min(initial_pos_.x, current_pos_.x) > check_x || std::max(initial_pos_.x, current_pos_.x) < check_x) return FLT_MAX;
+    if(min(initial_pos_.x, current_pos_.x) > check_x || max(initial_pos_.x, current_pos_.x) < check_x) return FLT_MAX;
 
     // Y = -2로 가정하고, X,Z 축 정보로 선분의 방정식 구하기 ( z = { (z2-z1)/(x2-x1) } * (x - x1) + z1 
     vec3   p1 = initial_pos_, p2 = current_pos_;

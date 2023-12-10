@@ -1,6 +1,4 @@
-﻿
-#include <gl/glew.h>
-#include <gl/freeglut.h>
+﻿#include <gl/freeglut.h>
 
 #include "objects/StageWaver.h"
 #include "objects/StageRoom.h"
@@ -151,11 +149,11 @@ StageBuilder::StageBuilder(int argc, char* argv[])
 
 void StageBuilder::load_textures()
 {
-    TextureBase::load_texture("../textures/stage.png", "Stage");
-    TextureBase::load_texture("../textures/spotlight.png", "Spotlight");
-    TextureBase::load_texture("../textures/metal.png", "Metal");
-    TextureBase::load_texture("../textures/room.png", "Room");
-    TextureBase::load_texture("../textures/curtain.png", "Curtain");
+    TextureBase::load_texture("textures/stage.png", "Stage");
+    TextureBase::load_texture("textures/spotlight.png", "Spotlight");
+    TextureBase::load_texture("textures/metal.png", "Metal");
+    TextureBase::load_texture("textures/room.png", "Room");
+    TextureBase::load_texture("textures/curtain.png", "Curtain");
 }
 
 void StageBuilder::load_objects()
@@ -210,8 +208,6 @@ void StageBuilder::start()
     load_objects();
 
     // OpenGL 액션 시작
-    glewInit();
-
     menu = new GLSMenu();
     menu->RegisterMenu();
 

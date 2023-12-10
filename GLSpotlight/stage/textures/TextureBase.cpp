@@ -1,8 +1,9 @@
 ﻿#include "TextureBase.h"
 
 #include <fstream>
-#include <gl/glew.h>
 #include <soil.h>
+#include <windows.h>
+#include <GL/GL.h>
 
 std::map<identifier, tid> TextureBase::registered_textures_;
 
