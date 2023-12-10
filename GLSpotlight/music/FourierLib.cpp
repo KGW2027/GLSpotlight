@@ -183,6 +183,8 @@ STFT_Out FourierLib::stft(STFT_Setting params)
         }
     }
 
+    double mmin = DBL_MAX, mmax = -DBL_MAX;
+    
     // FFT Body
     for(uint frame_idx = 0 ; frame_idx < out_frame_size[1] - extra ; frame_idx++)
     {
@@ -193,12 +195,17 @@ STFT_Out FourierLib::stft(STFT_Setting params)
         for(uint in_idx = 0 ; in_idx < out_frame_size[0] ; in_idx++)
         {
             result[pre_frame_size[1] + frame_idx][in_idx] = sqrt(out[in_idx][0] * out[in_idx][0] + out[in_idx][1] * out[in_idx][1]);
+            mmin = min(mmin, result[pre_frame_size[1] + frame_idx][in_idx]);
+            mmax = max(mmax, result[pre_frame_size[1] + frame_idx][in_idx]);
         }
     }
+
 
     STFT_Out output;
     output.out = result;
     output.size = new uint[]{out_frame_size[0], out_frame_size[1]};
+    printf("STFT Range : %.4lf ~ %.4lf\n", mmin, mmax);
+    printf("Shape : (%d, %d)\n", output.size[0], output.size[1]);
     
     // Memory Clean
     fftw_destroy_plan(plan);

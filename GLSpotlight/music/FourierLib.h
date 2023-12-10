@@ -10,10 +10,10 @@ typedef unsigned int uint;
 
 struct STFT_Setting
 {
-    uint    hop_len;
-    uint    win_len;
-    uint    in_len;
-    double  *in;
+    uint      hop_len;
+    uint      win_len;
+    uint      in_len;
+    double    *in;
 };
 
 struct dB_In

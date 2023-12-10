@@ -1,36 +1,21 @@
 ﻿#pragma once
 
 #include "StageObject.h"
-
-typedef double** frequencies;
-typedef double*  draw_data;
+#include "../../music/MusicStructs.h"
 
 #define MUTE_DECAY 0.9
 #define MIN_dB     80.0
 
-typedef unsigned int UINT32;
-typedef long long LONGLONG;
-
 class MusicReader;
-
-struct music_processor
-{
-    UINT32      index;
-    UINT32      *shape;
-    frequencies freq;
-    LONGLONG    term;
-    LONGLONG    length;
-    LONGLONG    current_time;
-};
 
 class StageWaver : public StageObject
 {
-    wchar_t             *path_         ;
-    MusicReader         *music_reader_ ;
-    music_processor     m_processor_   ;
-    draw_data           draw_data_     ;
-    Material            mat_freq_      ;
-    bool                is_terminated  ;
+    wchar_t         *path_         ;
+    MusicReader     *music_reader_ ;
+    MUSIC_PROCESSOR m_processor_   ;
+    double          *draw_data_    ;
+    Material        mat_freq_      ;
+    bool            is_terminated_ ;
 
     void pre_render() override;
     void rendering() override;
