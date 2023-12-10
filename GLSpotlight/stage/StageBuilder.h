@@ -16,7 +16,8 @@ class StageBuilder
     static std::vector<StageObject*>    render_objects_;
     static GLSCamera                    *camera_;
     static std::vector<StageSpotlight*> render_lights_;
-    
+
+    float get_random(float min, float max);
 public:
     
     static StageBuilder *s_builder;

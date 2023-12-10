@@ -200,7 +200,6 @@ STFT_Out FourierLib::stft(STFT_Setting params)
     STFT_Out output;
     output.out = result;
     output.size = new uint[]{out_frame_size[0], out_frame_size[1]};
-    printf("STFT_Shape (%d, %d)\n", out_frame_size[0], out_frame_size[1]);
     
     // Memory Clean
     fftw_destroy_plan(plan);

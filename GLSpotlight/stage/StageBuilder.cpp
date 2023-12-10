@@ -8,7 +8,11 @@
 #include "utils/GLSCamera.h"
 #include "StageBuilder.h"
 
+#include <ctime>
+#include <random>
+
 #include "objects/StageCurtain.h"
+#include "objects/StageHuman.h"
 #include "objects/StageStage.h"
 #include "textures/TextureBase.h"
 #include "utils/GLSMenu.h"
@@ -114,6 +118,16 @@ void StageBuilder::init()
     camera_ = new GLSCamera();
 }
 
+float StageBuilder::get_random(float min, float max)
+{
+    std::random_device rd;
+    std::default_random_engine generator(rd());
+    std::uniform_real_distribution<float> distribution(min, max);
+
+    // Generate a random value between x1 and x2
+    return distribution(generator);
+}
+
 StageBuilder::StageBuilder(int argc, char* argv[])
 {
     // OpenGL 초기화 
@@ -170,6 +184,24 @@ void StageBuilder::load_objects()
     add_render_objects(render_lights_[0]);
     add_render_objects(render_lights_[1]);
     add_render_objects(render_lights_[2]);
+
+    // Crowd
+    // 군중들은 x {-3.5 ~ 3.5} y {-1.5 ~ 1.5} z {-.75} 에 위치한다.
+    size_t total_human = 0;
+    float x, y = -1.5f + get_random(0.3f, 0.5f);
+    for(; y <= 1.5f ;)
+    {
+        x = -3.5f + get_random(0.3f, 0.5f);
+        for( ; x <= 3.5f ; )
+        {
+            add_render_objects(new StageHuman(x, y + get_random(-0.05f, 0.05f)));
+            total_human++;
+            x += get_random(0.3f, 0.5f);
+        }
+        y += get_random(0.3f, 0.5f);
+    }
+    printf("%lld Human placed.\n", total_human);
+    
 }
 
 void StageBuilder::start()

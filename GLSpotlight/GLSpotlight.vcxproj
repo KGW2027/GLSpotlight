@@ -239,6 +239,7 @@
     <ClCompile Include="music\ParseLogger.cpp" />
     <ClCompile Include="music\WaveReader.cpp" />
     <ClCompile Include="stage\objects\StageCurtain.cpp" />
+    <ClCompile Include="stage\objects\StageHuman.cpp" />
     <ClCompile Include="stage\objects\StageObject.cpp" />
     <ClCompile Include="stage\objects\StageRoom.cpp" />
     <ClCompile Include="stage\objects\StageSpotlight.cpp" />
@@ -260,6 +261,7 @@
     <ClInclude Include="music\ParseLogger.h" />
     <ClInclude Include="music\WaveReader.h" />
     <ClInclude Include="stage\objects\StageCurtain.h" />
+    <ClInclude Include="stage\objects\StageHuman.h" />
     <ClInclude Include="stage\objects\StageObject.h" />
     <ClInclude Include="stage\objects\StageRoom.h" />
     <ClInclude Include="stage\objects\StageSpotlight.h" />
