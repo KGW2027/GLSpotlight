@@ -11,6 +11,7 @@
 #include "objects/StageCurtain.h"
 #include "objects/StageStage.h"
 #include "textures/TextureBase.h"
+#include "utils/GLSMenu.h"
 
 #define TIMER_INTERVAL 16
 
@@ -94,6 +95,13 @@ void keyboard_event(unsigned char arg1, int arg2, int arg3)
     case '2':
         StageBuilder::set_curtain_mode(false);
         break;
+    case '3':
+        for(StageObject* object : StageBuilder::get_render_objects())
+        {
+            if(StageWaver* waver = dynamic_cast<StageWaver*>(object))
+                waver->stop();
+        }
+        break;
     }
 }
 
@@ -113,11 +121,10 @@ StageBuilder::StageBuilder(int argc, char* argv[])
     glutInitWindowSize(1280, 720);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutCreateWindow("GLSpotlight - Beta");
-
-    set_fps(30);
-    init();
     
     s_builder = this;
+    set_fps(30);
+    init();
     
     glutDisplayFunc(display);
     glutMouseFunc(mouse_click_event);
@@ -143,15 +150,15 @@ void StageBuilder::load_objects()
     // Building Wall Add
     add_render_objects(new StageRoom());
     add_render_objects(new StageStage());
-    
-    // Spectrum Render 오브젝트 실행
-    add_render_objects(waver);
 
     // Curtain Add
     StageCurtain *left = new StageCurtain(), *right = new StageCurtain();
     left->set_direction(false); right->set_direction(true);
     add_render_objects(left);
     add_render_objects(right);
+    
+    // Spectrum Render 오브젝트 실행
+    add_render_objects(waver);
 
     // Light Sources
     render_lights_.push_back(new StageSpotlight(GL_LIGHT0));
@@ -172,6 +179,9 @@ void StageBuilder::start()
 
     // OpenGL 액션 시작
     glewInit();
+
+    menu = new GLSMenu();
+    menu->RegisterMenu();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);

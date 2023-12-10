@@ -20,17 +20,20 @@ typedef const wchar_t* file_path;
 
 class MusicReader
 {
-    file_path   path_;
-    read_data   data_;
-    result      result_;
-    DWORD       data_len_;
-    DWORD       sample_rate_;
-    LONGLONG    time_term_;
-    LONGLONG    length_;
-    UINT32      bit_depth_;
-    UINT32      num_channels_;
-    UINT32      num_chunks_;
-    bool        is_valid_;
+    file_path   path_           ;
+    read_data   data_           ;
+    result      result_         ;
+    DWORD       data_len_       ;
+    DWORD       sample_rate_    ;
+    LONGLONG    time_term_      ;
+    LONGLONG    length_         ;
+    UINT32      bit_depth_      ;
+    UINT32      num_channels_   ;
+    UINT32      num_chunks_     ;
+    bool        is_valid_       ;
+    bool        is_terminated_  ;
+    bool        is_ready_       ;
+    bool        is_playing_     ;
 
     double** experiment_read_line(FILE* file);
     
@@ -60,11 +63,14 @@ class MusicReader
     std::vector<std::string> split(std::string input, char delimiter);
 public:
 
-    MusicReader(){}
+    MusicReader() : is_ready_(true){}
     
     MusicReader(file_path path);
 
     void play_music();
     
     result output(UINT32* length, LONGLONG* timestamp, LONGLONG* time_length);
+    void   terminate();
+    void   set_path(const wchar_t* new_path);
+    bool   is_ready() { return is_ready_ && !is_playing_; }
 };

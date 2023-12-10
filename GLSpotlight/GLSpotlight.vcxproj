@@ -246,6 +246,7 @@
     <ClCompile Include="stage\StageBuilder.cpp" />
     <ClCompile Include="stage\textures\TextureBase.cpp" />
     <ClCompile Include="stage\utils\GLSCamera.cpp" />
+    <ClCompile Include="stage\utils\GLSMenu.cpp" />
     <ClCompile Include="stage\utils\GLSPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -264,6 +265,7 @@
     <ClInclude Include="stage\StageBuilder.h" />
     <ClInclude Include="stage\textures\TextureBase.h" />
     <ClInclude Include="stage\utils\GLSCamera.h" />
+    <ClInclude Include="stage\utils\GLSMenu.h" />
     <ClInclude Include="stage\utils\GLSPhysics.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

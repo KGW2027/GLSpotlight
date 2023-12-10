@@ -18,59 +18,9 @@
 
 MusicReader::MusicReader(const wchar_t* path) : data_(nullptr), data_len_(0), is_valid_(false)
 {
-    path_ = path;
-    if (!is_file_exists(path_)) return;
-
-    is_valid_ = true;
-
-    // Read Audio Data
-    read_file();
-    
-    // Experiment - Pycharm STFT Result export Integration [ wav5 - (20854), wav4 - (25423), wav6 - (17292) ]
-    // const char    *file_path   = "F:/P_Programming/P_python/economyPract/export-stft-wav6.txt";
-    //       double  **parse_arr  = new double*[0];
-    //
-    // FILE*   file;
-    // if(!fopen_s(&file, file_path, "r"))
-    //     parse_arr = experiment_read_line(file);
-    //
-    // dB_In db_cvt;
-    // db_cvt.frame_count = P_Integ_L;
-    // db_cvt.window_size = P_Integ_S;
-    // db_cvt.top_dB      = 80.;
-    // db_cvt.in          = parse_arr;
-    // dB_Out db_out      = FourierLib::amp_to_dB(db_cvt);
-    // result_     = db_out.out;
-    // num_chunks_ = db_out.size[1];
-
-    // Experiment - Pycharm Music Parse Integration
-    // const char  *file_path  = "F:/P_Programming/P_python/economyPract/export-wav4.txt";
-    // uint        parse_len   = 0;
-    // double      *data       = ParseLogger::read_audio_export(file_path, &parse_len);
-    
-    //
-    // STFT DATA
-    STFT_Setting stft;
-    stft.hop_len = HOP_SIZE;
-    stft.win_len = WINDOW_SIZE;
-    stft.in = data_;
-    stft.in_len = data_len_;
-    STFT_Out out = FourierLib::stft(stft);
-    
-    dB_In db_cvt;
-    db_cvt.frame_count = out.size[1];
-    db_cvt.window_size = out.size[0];
-    db_cvt.top_dB = 80.;
-    db_cvt.in = out.out;
-    dB_Out db_out = FourierLib::amp_to_dB(db_cvt);
-    result_     = db_out.out;
-    num_chunks_ = db_out.size[1];
-
-    // dB Parse : -80, -57.2536
-    // norm parse : -80, -41.6194
-    // de-norm parse : -80, -41.6194
-    // my data : -39.2190, -39.9385
-    // norm my data : -39.2190, -39.9385
+    is_ready_      = true;
+    is_terminated_ = false;
+    set_path(path);
 }
 
 double** MusicReader::experiment_read_line(FILE* file)
@@ -228,6 +178,7 @@ void MusicReader::read_file()
         DWORD idx = 0;
         while(data_len_ < sample_count && idx < buffer_length)
         {
+            
             double audio_data = combine_audio_data(real_buffer, &idx);
             normalize(&audio_data);
             data_[data_len_++] = audio_data;
@@ -235,6 +186,8 @@ void MusicReader::read_file()
 
         over += buffer_length - idx;
     }
+
+    MFShutdown();
 }
 
 std::vector<std::string> MusicReader::split(std::string input, char delimiter)
@@ -248,11 +201,13 @@ std::vector<std::string> MusicReader::split(std::string input, char delimiter)
     }
  
     return answer;
-
 }
 
 void MusicReader::play_music()
 {
+    is_playing_    = true;
+    is_terminated_ = false;
+    
     HRESULT hr = MFStartup(MF_VERSION);
     check(hr, L"MF Initiate Exception");
 
@@ -289,9 +244,9 @@ void MusicReader::play_music()
     writer->BeginWriting();
     UINT32* shape = new UINT32[2];
     output(shape, nullptr, nullptr);
-    
+
     // Source에서 샘플 읽기
-    while (true)
+    while (!is_terminated_)
     {
         IMFSample* sample;
         DWORD streamFlags;
@@ -317,7 +272,13 @@ void MusicReader::play_music()
         // Stream에 Sample을 입력한다. (재생)
         writer->WriteSample(0, sample);
     }
+    
+    writer->Release();
     writer->Finalize();
+
+    MFShutdown();
+
+    is_playing_ = false;
 }
 
 result MusicReader::output(UINT32* length, LONGLONG* timestamp, LONGLONG* time_length)
@@ -337,4 +298,87 @@ result MusicReader::output(UINT32* length, LONGLONG* timestamp, LONGLONG* time_l
         *time_length = length_;
     
     return result_;
+}
+
+void MusicReader::terminate()
+{
+    is_ready_ = false;
+    
+    if(!is_terminated_) // terminate의 중복 호출 예방
+    {
+        if(data_ != nullptr)
+        {
+            free(data_);
+        }
+    
+        if(result_ != nullptr)
+        {
+            for(size_t idx = 0 ; idx < num_chunks_ ; idx++)
+                free(result_[idx]);
+            free(result_);
+        }
+    }
+    
+    is_ready_ = false;
+    is_terminated_ = true;
+}
+
+void MusicReader::set_path(const wchar_t* new_path)
+{
+    path_ = new_path;
+    if (!is_file_exists(path_)) return;
+
+    is_valid_ = true;
+
+    // Read Audio Data
+    read_file();
+    
+    // Experiment - Pycharm STFT Result export Integration [ wav5 - (20854), wav4 - (25423), wav6 - (17292) ]
+    // const char    *file_path   = "F:/P_Programming/P_python/economyPract/export-stft-wav6.txt";
+    //       double  **parse_arr  = new double*[0];
+    //
+    // FILE*   file;
+    // if(!fopen_s(&file, file_path, "r"))
+    //     parse_arr = experiment_read_line(file);
+    //
+    // dB_In db_cvt;
+    // db_cvt.frame_count = P_Integ_L;
+    // db_cvt.window_size = P_Integ_S;
+    // db_cvt.top_dB      = 80.;
+    // db_cvt.in          = parse_arr;
+    // dB_Out db_out      = FourierLib::amp_to_dB(db_cvt);
+    // result_     = db_out.out;
+    // num_chunks_ = db_out.size[1];
+
+    // Experiment - Pycharm Music Parse Integration
+    // const char  *file_path  = "F:/P_Programming/P_python/economyPract/export-wav4.txt";
+    // uint        parse_len   = 0;
+    // double      *data       = ParseLogger::read_audio_export(file_path, &parse_len);
+    
+    //
+    // STFT DATA
+    STFT_Setting stft;
+    stft.hop_len = HOP_SIZE;
+    stft.win_len = WINDOW_SIZE;
+    stft.in = data_;
+    stft.in_len = data_len_;
+    STFT_Out out = FourierLib::stft(stft);
+    
+    dB_In db_cvt;
+    db_cvt.frame_count = out.size[1];
+    db_cvt.window_size = out.size[0];
+    db_cvt.top_dB = 80.;
+    db_cvt.in = out.out;
+    dB_Out db_out = FourierLib::amp_to_dB(db_cvt);
+    result_     = db_out.out;
+    num_chunks_ = db_out.size[1];
+
+    is_terminated_ = false;
+    is_ready_ = true;
+
+    // dB Parse : -80, -57.2536
+    // norm parse : -80, -41.6194
+    // de-norm parse : -80, -41.6194
+    // my data : -39.2190, -39.9385
+    // norm my data : -39.2190, -39.9385
 }

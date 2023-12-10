@@ -1,16 +1,16 @@
-﻿
+﻿#define _CRT_SECURE_NO_WARNINGS
+
 #include "StageWaver.h"
 #include "../../music/MusicReader.h"
-
 #include <thread>
 #include <glm/common.hpp>
-
 #include "../StageBuilder.h"
 
 
 StageWaver::StageWaver(const wchar_t* wav_path) : music_reader_(nullptr), m_processor_(), draw_data_(nullptr)
 {
-    path_ = wav_path;
+    path_ = new wchar_t[128];
+    wcscpy(path_, wav_path);
     music_reader_ = new MusicReader(path_);
 }
 
@@ -19,17 +19,8 @@ void StageWaver::ready()
     position_[1] = -3.95f;
     position_[2] = 0.6f;
     scale_ = {.8f, .8f, .8f};
-    
-    // Play Spectrum Render
-    init_processor();
-    std::thread frame_proc(&StageWaver::process_frame, this);
-    frame_proc.detach();
 
-    // Play Music
-    assert(music_reader_ != nullptr);
-
-    std::thread music_thread(&MusicReader::play_music, music_reader_);
-    music_thread.detach();
+    play();
     
     // Background
     Material mat_back = get_default_material();
@@ -42,6 +33,39 @@ void StageWaver::ready()
     mat_freq_.color = get_rgba_by_ubyte(182, 231, 255, 1.0f);
 }
 
+void StageWaver::stop()
+{
+    is_terminated = true;
+    music_reader_->terminate();
+    StageBuilder::set_curtain_mode(false);
+}
+
+void StageWaver::play()
+{
+    while(!music_reader_->is_ready());
+    
+    is_terminated = false;
+    StageBuilder::set_curtain_mode(true);
+    
+    // Play Spectrum Render
+    init_processor();
+    std::thread frame_proc(&StageWaver::process_frame, this);
+    frame_proc.detach();
+
+    // Play Music
+    assert(music_reader_ != nullptr);
+
+    std::thread music_thread(&MusicReader::play_music, music_reader_);
+    music_thread.detach();
+}
+
+void StageWaver::play_new(wchar_t* new_path)
+{
+    wcscpy(path_, new_path);
+    free(new_path);
+    music_reader_->set_path(path_);
+}
+
 void StageWaver::pre_render()
 {
     StageObject::pre_render();
@@ -50,7 +74,7 @@ void StageWaver::pre_render()
 void StageWaver::rendering()
 {
     // Freq dB 정보 갱신
-    if(m_processor_.index < m_processor_.shape[0])
+    if(m_processor_.index < m_processor_.shape[0] && !is_terminated)
     {
         double* cur_freq = m_processor_.freq[m_processor_.index];
         for(uint i = 0 ; i < m_processor_.shape[1] ; i++)
@@ -92,7 +116,9 @@ void StageWaver::process_frame()
     {
         std::this_thread::sleep_until(until_time += delay);
         m_processor_.current_time = std::chrono::duration_cast<std::chrono::milliseconds>(until_time - start_time).count();
-    }while(++m_processor_.index < m_processor_.shape[0]);
+    }while(++m_processor_.index < m_processor_.shape[0] && !is_terminated);
+
+    m_processor_.index = 0;
 }
 
 void StageWaver::render_3d()

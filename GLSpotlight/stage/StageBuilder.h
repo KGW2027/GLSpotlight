@@ -2,6 +2,7 @@
 
 #include <vector>
 
+class GLSMenu;
 class StageObject;
 class StageSpotlight;
 class StageWaver;
@@ -20,6 +21,7 @@ public:
     
     static StageBuilder *s_builder;
            StageWaver   *waver;
+           GLSMenu      *menu;
            unsigned int timer_tick;
 
     StageBuilder(int argc, char *argv[]);
