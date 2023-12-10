@@ -126,14 +126,16 @@ void StageWaver::process_frame()
 void StageWaver::render_3d()
 {
     apply_material(GL_FRONT_AND_BACK, mat_freq_);
-    float dx   = 9.0f / static_cast<float>(m_processor_.win_len);
-    float half = static_cast<float>(m_processor_.win_len) / 2.f; 
+    float  dx    = 9.0f / static_cast<float>(m_processor_.win_len);
+    float  half  = static_cast<float>(m_processor_.win_len) / 2.f;
+    size_t uhalf = m_processor_.win_len / 2;
     for(size_t i = 0 ; i < m_processor_.win_len ; i++)
     {
         float blue = glm::clamp(pow(abs(static_cast<float>(i) - half) / half, 3), 0., 1.);
         glColor3f(1.0f-sqrt(blue), blue, blue);
-        
-        float norm_value = glm::clamp(abs(static_cast<float>(draw_data_[i] / 80.)), 0.f, 1.f) * 0.9f;
+
+        size_t cvt_i = i <= uhalf ? uhalf - i : m_processor_.win_len - i + uhalf;
+        float norm_value = glm::clamp(abs(static_cast<float>(draw_data_[cvt_i] / 80.)), 0.f, 1.f) * 0.9f;
         float sx = -4.5f + dx * i, ex = sx + dx;
         quad q = make_quad(sx, 0.01f, -norm_value, ex, 0.01f, norm_value);
         draw_quad(q);
