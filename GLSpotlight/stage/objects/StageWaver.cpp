@@ -3,6 +3,7 @@
 #include "StageWaver.h"
 #include "../../music/MusicReader.h"
 #include <thread>
+#include <gl/freeglut.h>
 #include <glm/common.hpp>
 #include "../StageBuilder.h"
 
@@ -73,6 +74,19 @@ void StageWaver::play_new(wchar_t* new_path)
 
 void StageWaver::pre_render()
 {
+    if(m_processor_.debug.size() > 0)
+    {
+        glColor3f(1, 1, 1);
+        float raster_z = 1.9f;
+        for(std::string line : m_processor_.debug)
+        {
+            glRasterPos3f(3.1f, -1.5f, raster_z);
+            for(size_t idx = 0 ; idx < line.length() ; idx++)
+                glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, line[idx]);
+            raster_z -= 0.09f;
+        }
+    }
+    
     StageObject::pre_render();
 }
 

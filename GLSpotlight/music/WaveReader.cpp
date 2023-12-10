@@ -239,20 +239,33 @@ WaveReader::WaveReader(wchar_t* file_path)
     concat();
     // export_data(out_[0]);
     free(norm_data);
-
-    print_info();
 }
 
-void WaveReader::print_info()
+std::vector<std::string> WaveReader::print_info()
 {
-    printf("===== ===== [WAVE FILE INFO] ===== =====\n");
-    printf("File Dir : %ls\n", file_path_);
-    printf("Num Of Channels : %hd\n", header_.num_channels);
-    printf("Sample Rate : %d\n", header_.sample_rate);
-    printf("Bit Per Sample : %hd\n", header_.bit_per_sample);
-    printf("Data Size : %d\n", header_.data_size);
-    printf("Music Length : %.2lf secs\n", get_music_length());
-    printf("===== ===== ===== == == ===== ===== =====\n");
+    std::vector<std::string> info;
+    std::wstring wpath = file_path_;
+    std::string fd   = "Playing Audio : " + std::string(wpath.begin(), wpath.end());
+    std::string len  = "Music Length : " + std::to_string(get_music_length()) + " secs";
+    std::string size = "File Size : " + std::to_string(header_.data_size / 10'000'000) + " MB";
+    
+    info.push_back("===== ===== [WAVE FILE INFO] ===== =====");
+    info.push_back(fd  );
+    info.push_back(len );
+    info.push_back(size);
+    info.push_back("===== ===== ===== == == ===== ===== =====");
+    info.push_back("GLSpotlight made by JNU-KGW");
+    
+    // printf("===== ===== [WAVE FILE INFO] ===== =====");
+    // printf("File Dir : %ls\n", file_path_);
+    // printf("Num Of Channels : %hd\n", header_.num_channels);
+    // printf("Sample Rate : %d\n", header_.sample_rate);
+    // printf("Bit Per Sample : %hd\n", header_.bit_per_sample);
+    // printf("Data Size : %d\n", header_.data_size);
+    // printf("Music Length : %.2lf secs\n", get_music_length());
+    // printf("\n");
+
+    return info;
 }
 
 MUSIC_PROCESSOR WaveReader::make_processor()

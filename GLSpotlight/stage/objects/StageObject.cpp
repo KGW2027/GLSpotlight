@@ -5,6 +5,8 @@
 #include <gl/freeglut.h>
 #include <glm/common.hpp>
 
+#include "../StageBuilder.h"
+
 enum Expect_Axis
 {
     EXPECT_X = 0x01,

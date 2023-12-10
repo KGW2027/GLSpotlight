@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <cstdio>
+#include <string>
 #include <vector>
 
 #include "FourierLib.h"
@@ -41,7 +42,7 @@ public:
 
     WaveReader(wchar_t* file_path);
 
-    void    print_info();
+    std::vector<std::string> print_info();
     double  get_music_length() { return static_cast<double>(get_data_count()) / header_.sample_rate; }
     
     STFT_Out        get_stft_result()  { return out_[0]; }

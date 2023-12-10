@@ -133,7 +133,8 @@ void MusicReader::set_path(const wchar_t* new_path)
 
     processor_.win_len  = db_out.size[0];
     processor_.data     = db_out.out;
-    processor_.time_len = max(processor_.time_len, db_out.size[1]); 
+    processor_.time_len = max(processor_.time_len, db_out.size[1]);
+    processor_.debug    = wav_reader_->print_info();
 
     is_valid_ = true;
     is_terminated_ = false;
