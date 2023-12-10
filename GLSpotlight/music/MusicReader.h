@@ -17,7 +17,6 @@ class MusicReader
     file_path   path_           ;
     WaveReader  *wav_reader_    ;
     
-    bool        is_valid_       ;
     bool        is_terminated_  ;
     bool        is_ready_       ;
     bool        is_playing_     ;
@@ -41,10 +40,8 @@ class MusicReader
     
 public:
     MUSIC_PROCESSOR processor_  ;
-
-    MusicReader() : is_ready_(true){}
     
-    MusicReader(file_path path);
+    MusicReader();
 
     void   play_music();
     void   terminate();

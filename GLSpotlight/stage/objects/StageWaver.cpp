@@ -8,13 +8,13 @@
 #include "../StageBuilder.h"
 
 
-StageWaver::StageWaver(const wchar_t* wav_path) : music_reader_(nullptr), m_processor_(), draw_data_(nullptr),
+StageWaver::StageWaver() : music_reader_(nullptr), m_processor_(), draw_data_(nullptr),
                                                   mat_freq_(),
                                                   is_terminated_(false)
 {
     path_ = new wchar_t[128];
-    wcscpy(path_, wav_path);
-    music_reader_ = new MusicReader(path_);
+    // wcscpy(path_, wav_path);
+    music_reader_ = new MusicReader();
 }
 
 void StageWaver::ready()
@@ -22,8 +22,6 @@ void StageWaver::ready()
     position_[1] = -3.95f;
     position_[2] = 0.6f;
     scale_ = {.8f, .8f, .8f};
-
-    play();
     
     // Background
     Material mat_back = get_default_material();
@@ -42,6 +40,7 @@ void StageWaver::stop()
 {
     is_terminated_ = true;
     music_reader_->terminate();
+    m_processor_.debug.clear();
     StageBuilder::set_curtain_mode(false);
 }
 

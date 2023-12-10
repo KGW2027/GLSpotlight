@@ -27,7 +27,7 @@ class StageWaver : public StageObject
     
     
 public:
-    StageWaver(const wchar_t* wav_path);
+    StageWaver();
     void ready() override;
 
     void stop();

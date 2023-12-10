@@ -270,10 +270,10 @@ void WaveReader::clear()
     FourierLib::free_stft_out(out_[0]);
     out_.clear();
 
-    delete[] header_.data;
-    delete[] header_.fmt;
-    delete[] header_.riff;
-    delete[] header_.wave;
+    // delete[] header_.data;
+    // delete[] header_.fmt;
+    // delete[] header_.riff;
+    // delete[] header_.wave;
 }
 
 void WaveReader::free_wave_data(WAVE_DATA data)

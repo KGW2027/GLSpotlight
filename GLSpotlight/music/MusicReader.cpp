@@ -12,11 +12,11 @@
 
 // Audio Play : https://stackoverflow.com/questions/65412545/how-to-increase-mp3-decoding-quality-media-foundation
 
-MusicReader::MusicReader(const wchar_t* path) : is_valid_(false)
+MusicReader::MusicReader() : path_(nullptr), wav_reader_(nullptr), is_playing_(false), processor_()
 {
-    is_ready_      = true;
+    is_ready_ = true;
     is_terminated_ = false;
-    set_path(path);
+    // set_path(path);
 }
 
 void MusicReader::play_music()
@@ -109,6 +109,7 @@ void MusicReader::terminate()
         for(size_t idx = 0 ; idx < processor_.time_len ; idx++)
             delete[] processor_.data[idx];
         delete[] processor_.data;
+        processor_.data = nullptr;
         
         processor_.debug.clear();
     }
@@ -139,8 +140,7 @@ void MusicReader::set_path(const wchar_t* new_path)
     processor_.time_len = max(processor_.time_len, db_out.size[1]);
     processor_.debug    = wav_reader_->print_info();
     wav_reader_->clear();
-
-    is_valid_ = true;
+    
     is_terminated_ = false;
     is_ready_ = true;
 }

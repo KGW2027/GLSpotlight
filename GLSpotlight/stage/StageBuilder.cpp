@@ -114,7 +114,7 @@ void keyboard_event(unsigned char arg1, int arg2, int arg3)
 
 void StageBuilder::init()
 {
-    waver = new StageWaver(L"../test6.wav");
+    waver = new StageWaver();
     camera_ = new GLSCamera();
 }
 
