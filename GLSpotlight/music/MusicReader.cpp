@@ -106,11 +106,13 @@ void MusicReader::terminate()
     
     if(!is_terminated_ && wav_reader_ != nullptr) // terminate의 중복 호출 예방
     {
-        wav_reader_->clear();
-        wav_reader_ = nullptr;
+        for(size_t idx = 0 ; idx < processor_.time_len ; idx++)
+            delete[] processor_.data[idx];
+        delete[] processor_.data;
+        
+        processor_.debug.clear();
     }
     
-    is_ready_ = false;
     is_terminated_ = true;
 }
 
@@ -121,7 +123,8 @@ void MusicReader::set_path(const wchar_t* new_path)
     
     wav_reader_ = new WaveReader(const_cast<wchar_t*>(path_));
     processor_  = wav_reader_->make_processor();
-
+    
+    // out의 memory free는 Wave Reader.clear에서 진행
     STFT_Out out = wav_reader_->get_stft_result();
     
     dB_In db_cvt;
@@ -135,6 +138,7 @@ void MusicReader::set_path(const wchar_t* new_path)
     processor_.data     = db_out.out;
     processor_.time_len = max(processor_.time_len, db_out.size[1]);
     processor_.debug    = wav_reader_->print_info();
+    wav_reader_->clear();
 
     is_valid_ = true;
     is_terminated_ = false;

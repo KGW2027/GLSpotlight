@@ -68,7 +68,7 @@ void StageWaver::play()
 void StageWaver::play_new(wchar_t* new_path)
 {
     wcscpy(path_, new_path);
-    free(new_path);
+    delete[] new_path;
     music_reader_->set_path(path_);
 }
 

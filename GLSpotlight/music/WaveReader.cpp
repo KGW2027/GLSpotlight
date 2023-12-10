@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <string>
 
+bool WaveReader::debug_lock = false;
 
 void WaveReader::fill_buffer()
 {
@@ -165,34 +166,14 @@ double** WaveReader::normalize(WAVE_DATA data)
         }
     }
 
+    free_wave_data(data);
+
     return norm;
 }
 
 bool WaveReader::is_data(unsigned char* test_arr)
 {
     return test_arr[0] == 'd' && test_arr[1] == 'a' && test_arr[2] == 't' && test_arr[3] == 'a';
-}
-
-void WaveReader::export_data(STFT_Out ext)
-{
-    FILE* exportFile;
-    exportFile = fopen("../export_stft.txt", "w+");
-
-    for(size_t widx = 0 ; widx < ext.size[0] ; widx++)
-    {
-        std::string str = std::to_string(ext.out[0][widx]);
-        for(size_t sidx = 1 ; sidx < ext.size[1] ; sidx++)
-        {
-            str += "," + std::to_string(ext.out[sidx][widx]);  
-        }
-        str += "\n";
-        fwrite(str.c_str(), sizeof(char), str.length(), exportFile);
-        
-        if(widx % 25 == 0)
-            printf("Export Data (%llu / %d) ··· %.2f%%\n", widx, ext.size[0], static_cast<double>(widx * 100) / static_cast<double>(ext.size[0]));
-    }
-    fflush(exportFile);
-    fclose(exportFile);
 }
 
 void WaveReader::concat()
@@ -223,8 +204,9 @@ WaveReader::WaveReader(wchar_t* file_path)
 
     WAVE_DATA parse_data = header_.bit_per_sample == 8 ? parse_data_8bit() : parse_data_16bit();
     double**  norm_data  = normalize(parse_data);
-    free_wave_data(parse_data);
+    delete[] buffer_;
 
+    // Big Leakage
     for(size_t channel = 0 ; channel < header_.num_channels ; channel++)
     {
         STFT_Setting stft_settings;
@@ -233,12 +215,17 @@ WaveReader::WaveReader(wchar_t* file_path)
         stft_settings.hop_len  = 512;
         stft_settings.win_len  = 2048;
         STFT_Out out = FourierLib::stft(stft_settings);
-        // FourierLib::amp_to_mel(out, header_.sample_rate);
         out_.push_back(out);
+        delete[] norm_data[channel];
     }
+    
     concat();
-    // export_data(out_[0]);
-    free(norm_data);
+    for(size_t idx = 1 ; idx < out_.size() ; idx++) FourierLib::free_stft_out(out_[idx]);
+    delete[] norm_data;
+
+    
+    // while(debug_lock) {}
+    if(!debug_lock) debug_lock = true;
 }
 
 std::vector<std::string> WaveReader::print_info()
@@ -247,7 +234,7 @@ std::vector<std::string> WaveReader::print_info()
     std::wstring wpath = file_path_;
     std::string fd   = "Playing Audio : " + std::string(wpath.begin(), wpath.end());
     std::string len  = "Music Length : " + std::to_string(get_music_length()) + " secs";
-    std::string size = "File Size : " + std::to_string(header_.data_size / 10'000'000) + " MB";
+    std::string size = "File Size : " + std::to_string(header_.data_size / 1'000'000) + " MB";
     
     info.push_back("===== ===== [WAVE FILE INFO] ===== =====");
     info.push_back(fd  );
@@ -255,15 +242,6 @@ std::vector<std::string> WaveReader::print_info()
     info.push_back(size);
     info.push_back("===== ===== ===== == == ===== ===== =====");
     info.push_back("GLSpotlight made by JNU-KGW");
-    
-    // printf("===== ===== [WAVE FILE INFO] ===== =====");
-    // printf("File Dir : %ls\n", file_path_);
-    // printf("Num Of Channels : %hd\n", header_.num_channels);
-    // printf("Sample Rate : %d\n", header_.sample_rate);
-    // printf("Bit Per Sample : %hd\n", header_.bit_per_sample);
-    // printf("Data Size : %d\n", header_.data_size);
-    // printf("Music Length : %.2lf secs\n", get_music_length());
-    // printf("\n");
 
     return info;
 }
@@ -287,18 +265,25 @@ void WaveReader::clear()
 {
     if(target_file_ != nullptr)
         fclose(target_file_);
-    free(buffer_);
-    // free(file_path_);
+
+    // Free out_
+    FourierLib::free_stft_out(out_[0]);
+    out_.clear();
+
+    delete[] header_.data;
+    delete[] header_.fmt;
+    delete[] header_.riff;
+    delete[] header_.wave;
 }
 
 void WaveReader::free_wave_data(WAVE_DATA data)
 {
     for(size_t idx = 0 ; idx < header_.num_channels ; idx++)
     {
-        if(data.data_8  != nullptr) free(data.data_8 [idx]);
-        if(data.data_16 != nullptr) free(data.data_16[idx]);
+        if(data.data_8  != nullptr) delete[] data.data_8 [idx];
+        if(data.data_16 != nullptr) delete[] data.data_16[idx];
     }
 
-    if(data.data_8  != nullptr) free(data.data_8 );
-    if(data.data_16 != nullptr) free(data.data_16);
+    delete[] data.data_8 ;
+    delete[] data.data_16;
 }

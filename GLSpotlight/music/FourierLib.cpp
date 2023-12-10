@@ -65,6 +65,22 @@ dB_Out FourierLib::amp_to_dB(dB_In params)
     return result;
 }
 
+void FourierLib::free_stft_out(STFT_Out out)
+{
+    for(size_t idx = 0 ; idx < out.size[1] ; idx++)
+        delete[] out.out[idx];
+    delete[] out.out;
+    delete[] out.size;
+}
+
+void FourierLib::free_db_out(dB_Out out)
+{
+    for(size_t idx = 0 ; idx < out.size[1] ; idx++)
+        delete[] out.out[idx];
+    delete[] out.out;
+    delete[] out.size;
+}
+
 double* FourierLib::padding(uint pad_l, uint pad_r, double* arr, uint offset, uint len)
 {
     uint tlen = pad_l + pad_r + len;
@@ -146,11 +162,12 @@ STFT_Out FourierLib::stft(STFT_Setting params)
 
     out_frame_size[0] = 1 + params.win_len / 2;
     out_frame_size[1] += extra;
-
+    
     // Init Matrix
     result = new double*[out_frame_size[1]];
     for(uint idx = 0 ; idx < out_frame_size[1] ; idx++)
         result[idx] = new double[out_frame_size[0]];
+
 
     fftw_plan plan = fftw_plan_dft_r2c_1d(static_cast<int>(params.win_len), in, out, FFTW_ESTIMATE); 
 
@@ -208,10 +225,15 @@ STFT_Out FourierLib::stft(STFT_Setting params)
     
     delete[] fft_window;
     delete[] y_pre;
-    delete[] y_frame_pre;
     delete[] y_post;
+
+    for(size_t idx = 0 ; idx < pre_frame_size[1] ; idx++) delete[] y_frame_pre[idx];
+    delete[] y_frame_pre;
+    for(size_t idx = 0 ; idx < post_frame_size[1] ; idx++) delete[] y_frame_post[idx];
     delete[] y_frame_post;
+    for(size_t idx = 0 ; idx < out_frame_size[1] - extra ; idx++) delete[] audio_frames[idx];
     delete[] audio_frames;
+    
     free(pre_frame_size);
     free(post_frame_size);
     free(out_frame_size);

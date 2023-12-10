@@ -49,4 +49,7 @@ public:
 
     static STFT_Out stft(STFT_Setting params);
     static dB_Out   amp_to_dB(dB_In params);
+
+    static void     free_stft_out(STFT_Out out);
+    static void     free_db_out(dB_Out out);
 };
