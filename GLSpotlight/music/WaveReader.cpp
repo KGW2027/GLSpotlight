@@ -192,7 +192,9 @@ WaveReader::WaveReader(wchar_t* file_path)
         stft_settings.in_len   = get_data_count();
         stft_settings.hop_len  = 512;
         stft_settings.win_len  = 2048;
-        out_.push_back(FourierLib::stft(stft_settings));
+        STFT_Out out = FourierLib::stft(stft_settings);
+        // FourierLib::amp_to_mel(out, header_.sample_rate);
+        out_.push_back(out);
     }
     free(norm_data);
 
@@ -231,8 +233,7 @@ void WaveReader::clear()
     if(target_file_ != nullptr)
         fclose(target_file_);
     free(buffer_);
-    free(file_path_);
-    
+    // free(file_path_);
 }
 
 void WaveReader::free_wave_data(WAVE_DATA data)

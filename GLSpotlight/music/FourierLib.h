@@ -5,8 +5,10 @@
 #pragma comment(lib, "mfreadwrite")
 #pragma comment(lib, "mf")
 #pragma comment(lib, "ole32")
+#include <vector>
 
-typedef unsigned int uint;
+typedef unsigned int        uint;
+typedef std::vector<double> filter_bank;
 
 struct STFT_Setting
 {
@@ -42,9 +44,15 @@ class FourierLib
     static double** frame(double* arr, uint len, uint win_len, uint hop_len, uint* shape);
     static void     w_hann(double* out, uint window_length);
     static void     w_hamming(double* out, uint window_length);
+    static double   mel_to_hz(double mel);
+    static double   hz_to_mel(double hz );
+    
+    static filter_bank make_mel_fb(uint num_filters, uint fft_size, uint sr);
+    
     
 public:
 
     static STFT_Out stft(STFT_Setting params);
     static dB_Out   amp_to_dB(dB_In params);
+    static void     amp_to_mel(STFT_Out stft, uint sr);
 };

@@ -104,8 +104,10 @@ void MusicReader::terminate()
 {
     is_ready_ = false;
     
-    if(!is_terminated_) // terminate의 중복 호출 예방
+    if(!is_terminated_ && wav_reader_ != nullptr) // terminate의 중복 호출 예방
     {
+        wav_reader_->clear();
+        wav_reader_ = nullptr;
     }
     
     is_ready_ = false;

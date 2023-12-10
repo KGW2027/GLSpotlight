@@ -12,10 +12,6 @@
 class WaveReader;
 typedef const wchar_t* file_path;
 
-#define WINDOW_SIZE 2048
-#define HOP_SIZE 512
-#define AMIN 1e-8
-
 class MusicReader
 {
     file_path   path_           ;
