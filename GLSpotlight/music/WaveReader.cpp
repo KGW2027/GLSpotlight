@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <string>
 
 
 void WaveReader::fill_buffer()
@@ -172,6 +173,45 @@ bool WaveReader::is_data(unsigned char* test_arr)
     return test_arr[0] == 'd' && test_arr[1] == 'a' && test_arr[2] == 't' && test_arr[3] == 'a';
 }
 
+void WaveReader::export_data(STFT_Out ext)
+{
+    FILE* exportFile;
+    exportFile = fopen("../export_stft.txt", "w+");
+
+    for(size_t widx = 0 ; widx < ext.size[0] ; widx++)
+    {
+        std::string str = std::to_string(ext.out[0][widx]);
+        for(size_t sidx = 1 ; sidx < ext.size[1] ; sidx++)
+        {
+            str += "," + std::to_string(ext.out[sidx][widx]);  
+        }
+        str += "\n";
+        fwrite(str.c_str(), sizeof(char), str.length(), exportFile);
+        
+        if(widx % 25 == 0)
+            printf("Export Data (%llu / %d) ··· %.2f%%\n", widx, ext.size[0], static_cast<double>(widx * 100) / static_cast<double>(ext.size[0]));
+    }
+    fflush(exportFile);
+    fclose(exportFile);
+}
+
+void WaveReader::concat()
+{
+    STFT_Out base = out_[0];
+
+    // Compress Base
+    for(size_t idx = 0 ; idx < base.size[1] / 2 ; idx++)
+        for(size_t fidx = 0 ; fidx < base.size[0] ; fidx++)
+            base.out[idx][fidx] = (base.out[idx*2][fidx] + base.out[idx*2+1][fidx]) / 2.0;
+
+    STFT_Out next = out_[1];
+    size_t offset = base.size[1] / 2;
+    for(size_t idx = 0 ; idx < next.size[1] / 2 ; idx++)
+        for(size_t fidx = 0 ; fidx < next.size[0] ; fidx++)
+            base.out[idx + offset][fidx] = (next.out[idx*2][fidx] + next.out[idx*2+1][fidx]) / 2.0;
+    
+}
+
 WaveReader::WaveReader(wchar_t* file_path)
 {
     file_path_ = file_path;
@@ -196,6 +236,8 @@ WaveReader::WaveReader(wchar_t* file_path)
         // FourierLib::amp_to_mel(out, header_.sample_rate);
         out_.push_back(out);
     }
+    concat();
+    // export_data(out_[0]);
     free(norm_data);
 
     print_info();

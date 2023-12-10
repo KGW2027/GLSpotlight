@@ -34,6 +34,8 @@ class WaveReader
 
     double** normalize(WAVE_DATA data);
     bool     is_data(unsigned char* test_arr);
+    void     export_data(STFT_Out ext);
+    void     concat();
     
 public:
 
