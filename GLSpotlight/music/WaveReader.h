@@ -43,7 +43,8 @@ public:
 
     void    print_info();
     double  get_music_length() { return static_cast<double>(get_data_count()) / header_.sample_rate; }
-    Out     get_stft_result()  { return out_; }
+    
+    STFT_Out        get_stft_result()  { return out_[0]; }
     MUSIC_PROCESSOR make_processor();
 
     void    clear();

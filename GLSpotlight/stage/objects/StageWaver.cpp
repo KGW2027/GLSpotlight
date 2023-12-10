@@ -32,7 +32,9 @@ void StageWaver::ready()
     });
 
     mat_freq_ = get_default_material();
-    mat_freq_.color = get_rgba_by_ubyte(182, 231, 255, 1.0f);
+    mat_freq_.color    = get_rgba_by_ubyte(182, 231, 255, 1.0f);
+    mat_freq_.specular = get_rgba_by_ubyte(184, 248, 251, 1.0f);
+    // mat_freq_.shininess= 0.01f;
 }
 
 void StageWaver::stop()
@@ -82,7 +84,7 @@ void StageWaver::rendering()
         double* cur_freq = m_processor_.data[m_processor_.index];
         for(size_t i = 0 ; i < m_processor_.win_len ; i++)
         {
-            if( abs(MIN_dB + cur_freq[i]) < 0.01 ) draw_data_[i] *= MUTE_DECAY;
+            if( abs(cur_freq[i]) >= MIN_dB - 0.1f ) draw_data_[i] *= MUTE_DECAY;
             else draw_data_[i] = cur_freq[i];
         }
     }
@@ -112,6 +114,8 @@ void StageWaver::process_frame()
     typedef std::chrono::high_resolution_clock hr_clock;
     auto until_time = hr_clock::now();
     auto delay      = std::chrono::nanoseconds(m_processor_.length / m_processor_.time_len * 100);
+
+    for(size_t idx = 0 ; idx < m_processor_.win_len ; idx++) draw_data_[idx] = -MIN_dB;
     
     do   std::this_thread::sleep_until(until_time += delay);
     while(++m_processor_.index < m_processor_.time_len && !is_terminated_);
@@ -122,9 +126,13 @@ void StageWaver::process_frame()
 void StageWaver::render_3d()
 {
     apply_material(GL_FRONT_AND_BACK, mat_freq_);
-    float dx = 9.0f / static_cast<float>(m_processor_.win_len);
+    float dx   = 9.0f / static_cast<float>(m_processor_.win_len);
+    float half = static_cast<float>(m_processor_.win_len) / 2.f; 
     for(size_t i = 0 ; i < m_processor_.win_len ; i++)
     {
+        float blue = glm::clamp(pow(abs(static_cast<float>(i) - half) / half, 3), 0., 1.);
+        glColor3f(1.0f-sqrt(blue), blue, blue);
+        
         float norm_value = glm::clamp(abs(static_cast<float>(draw_data_[i] / 80.)), 0.f, 1.f) * 0.9f;
         float sx = -4.5f + dx * i, ex = sx + dx;
         quad q = make_quad(sx, 0.01f, -norm_value, ex, 0.01f, norm_value);

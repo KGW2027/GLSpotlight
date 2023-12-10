@@ -122,7 +122,7 @@ void MusicReader::set_path(const wchar_t* new_path)
     wav_reader_ = new WaveReader(const_cast<wchar_t*>(path_));
     processor_  = wav_reader_->make_processor();
 
-    STFT_Out out = wav_reader_->get_stft_result()[0];
+    STFT_Out out = wav_reader_->get_stft_result();
     
     dB_In db_cvt;
     db_cvt.frame_count = out.size[1];
@@ -131,6 +131,7 @@ void MusicReader::set_path(const wchar_t* new_path)
     db_cvt.in = out.out;
     dB_Out db_out = FourierLib::amp_to_dB(db_cvt);
 
+    processor_.win_len  = db_out.size[0];
     processor_.data     = db_out.out;
     processor_.time_len = max(processor_.time_len, db_out.size[1]); 
 

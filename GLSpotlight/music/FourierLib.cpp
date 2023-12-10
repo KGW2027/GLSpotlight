@@ -23,33 +23,6 @@ void FourierLib::w_hamming(double* out, uint window_length)
         out[idx] = 0.54 - 0.46 * std::cos(2 * PI * idx / (window_length - 1));
 }
 
-double FourierLib::mel_to_hz(double mel)
-{
-    return 700. * pow(10.0, mel / 2595.) - 1.0;
-}
-
-double FourierLib::hz_to_mel(double hz)
-{
-    return 2595. * log10(1.0 + hz / 700.);
-}
-
-filter_bank FourierLib::make_mel_fb(uint num_filters, uint fft_size, uint sr)
-{
-    filter_bank filter_bank;
-
-    double ms = hz_to_mel(0.0);
-    double me = hz_to_mel(static_cast<double>(sr) / 2.0);
-
-    num_filters++;
-    for(int i = 0 ; i <= num_filters ; i++)
-    {
-        double mel = ms + i * (me - ms) / num_filters;
-        filter_bank.push_back(mel_to_hz(mel));
-    }
-
-    return filter_bank;
-}
-
 dB_Out FourierLib::amp_to_dB(dB_In params)
 {
     double  **out   = new double*[params.frame_count];
@@ -90,34 +63,6 @@ dB_Out FourierLib::amp_to_dB(dB_In params)
     result.out = out;
     result.size = new uint[]{params.window_size, params.frame_count};
     return result;
-}
-
-void FourierLib::amp_to_mel(STFT_Out stft, uint sr)
-{
-    const uint num_filters = 20;
-    const uint fft_size = stft.size[0];
-
-    filter_bank fb = make_mel_fb(num_filters, fft_size, sr);
-
-    for(size_t tidx = 0 ; tidx < stft.size[1] ; tidx++)
-    {
-        filter_bank result(num_filters, 0.0);
-
-        for(uint i = 1 ; i < num_filters ; i++)
-        {
-            for(uint j = 0 ; j < fft_size ; j++)
-            {
-                double hz = static_cast<double>(j) / (fft_size / 2) * (sr / 2);
-                if (hz >= fb[i - 1] && hz <= fb[i + 1]) {
-                    double weight = (hz - fb[i - 1]) / (fb[i] - fb[i - 1]);
-                    result[i-1] += weight * stft.out[tidx][j];
-                } else if (hz >= fb[i] && hz <= fb[i + 2]) {
-                    double weight = (fb[i + 2] - hz) / (fb[i + 2] - fb[i]);
-                    result[i-1] += weight * stft.out[tidx][j];
-                }
-            }
-        }
-    }
 }
 
 double* FourierLib::padding(uint pad_l, uint pad_r, double* arr, uint offset, uint len)
@@ -237,8 +182,6 @@ STFT_Out FourierLib::stft(STFT_Setting params)
                 result[real_frame_idx][in_idx] = sqrt(out[in_idx][0] * out[in_idx][0] + out[in_idx][1] * out[in_idx][1]);
         }
     }
-
-    double mmin = DBL_MAX, mmax = -DBL_MAX;
     
     // FFT Body
     for(uint frame_idx = 0 ; frame_idx < out_frame_size[1] - extra ; frame_idx++)
@@ -250,8 +193,6 @@ STFT_Out FourierLib::stft(STFT_Setting params)
         for(uint in_idx = 0 ; in_idx < out_frame_size[0] ; in_idx++)
         {
             result[pre_frame_size[1] + frame_idx][in_idx] = sqrt(out[in_idx][0] * out[in_idx][0] + out[in_idx][1] * out[in_idx][1]);
-            mmin = min(mmin, result[pre_frame_size[1] + frame_idx][in_idx]);
-            mmax = max(mmax, result[pre_frame_size[1] + frame_idx][in_idx]);
         }
     }
 
@@ -259,6 +200,7 @@ STFT_Out FourierLib::stft(STFT_Setting params)
     STFT_Out output;
     output.out = result;
     output.size = new uint[]{out_frame_size[0], out_frame_size[1]};
+    printf("STFT_Shape (%d, %d)\n", out_frame_size[0], out_frame_size[1]);
     
     // Memory Clean
     fftw_destroy_plan(plan);
