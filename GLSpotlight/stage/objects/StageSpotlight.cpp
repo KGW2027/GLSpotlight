@@ -53,7 +53,7 @@ StageSpotlight::StageSpotlight(GLenum light_source)
 {
     light_data_ = get_default_light_source();
     light_data_.id = light_source;
-    light_data_.diffuse  = get_rgba_by_ubyte(255, 255, 255, 1.0);
+    light_data_.diffuse  = get_rgba_by_ubyte(255, 0, 0, 1.0);
     light_data_.cut_off  = 40.0f;
     light_data_.exponent = 15.0f;
     

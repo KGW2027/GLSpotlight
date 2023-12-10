@@ -8,7 +8,7 @@
 
 void StageHuman::move_arm()
 {
-    interp_point_ += get_random() / 100 * (arm_ascend_ ? -1.f : 1.f);
+    interp_point_ += (arm_ascend_ ? -1.f : 1.f) * (arm_mode_ == FWD ? 0.03f : 0.01f);
     if( (arm_ascend_ && interp_point_ <= 0.0f) || (!arm_ascend_ && interp_point_ >= 1.0f) )
         arm_ascend_ = !arm_ascend_;
     interp_point_ = glm::clamp(interp_point_, 0.0f, 1.0f);
@@ -41,16 +41,16 @@ GLfloat* StageHuman::random_color(int i)
 
 void StageHuman::pre_render()
 {
-    if(++color_change_ >= 100)
-    {
-        color_change_ = 0;
-        GLfloat* new_color = random_color(static_cast<int>(floor(get_random() * 8.f)));
-        target_color_ = {new_color[0], new_color[1], new_color[2]};
-        free(new_color);
-    }
-
-    for(int i = 0 ; i < 3 ; i++)
-        cur_color_[i] -= (cur_color_[i] - target_color_[i]) * 0.005f;
+    // if(++color_change_ >= 100)
+    // {
+    //     color_change_ = 0;
+    //     GLfloat* new_color = random_color(static_cast<int>(floor(get_random() * 8.f)));
+    //     target_color_ = {new_color[0], new_color[1], new_color[2]};
+    //     free(new_color);
+    // }
+    //
+    // for(int i = 0 ; i < 3 ; i++)
+    //     cur_color_[i] -= (cur_color_[i] - target_color_[i]) * 0.005f;
     
     StageObject::pre_render();
     move_arm();
@@ -106,8 +106,8 @@ void StageHuman::ready()
     arm_mode_   = FWD;
 
     color_change_ = 0;
-    cur_color_ = {0.5f, 1.f, 1.f};
-    target_color_ = {0.5f, 1.f, 1.f};
+    cur_color_ = {1.0f, 0.f, 0.f};
+    target_color_ = {1.0f, 0.f, 0.f};
 
     mat_head_ = get_default_material();
     mat_head_.color = get_rgba_by_ubyte(25, 25, 25, 1.0f);
