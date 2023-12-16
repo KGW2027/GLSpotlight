@@ -6,12 +6,13 @@
 #include <assert.h>
 #include <string>
 
-bool WaveReader::debug_lock = false;
-
 void WaveReader::fill_buffer()
 {
     if(buffer_ == nullptr)
+    {
         buffer_ = new uint8[BUFFER_SIZE];
+        file_ptr_ = 0;
+    }
     buffer_length_ = fread(buffer_, sizeof(uint8), BUFFER_SIZE, target_file_);
 }
 
@@ -20,12 +21,31 @@ uint8 WaveReader::read()
     if(buffer_ == nullptr || file_ptr_ >= buffer_length_)
     {
         fill_buffer();
-        file_ptr_ = 0;
+        file_ptr_ = file_ptr_ >= BUFFER_SIZE ? file_ptr_ - BUFFER_SIZE : 0;
     }
     
     if(buffer_length_ == 0) return 0;
     
     return buffer_[file_ptr_++];
+}
+
+void WaveReader::check(uint8* arr, size_t len, const char* test)
+{
+    reads(arr, len);
+    bool success = true;
+    for(size_t idx = 0 ; idx < len ; idx++)
+    {
+        if(arr[idx] == test[idx]) continue;
+        success = false;
+    }
+
+    if(!success)
+    {
+        uint32 skip_length = endian32();
+        file_ptr_ += skip_length;
+        check(arr, len, test);
+    }
+
 }
 
 void WaveReader::reads(uint8* arr, size_t len)
@@ -38,10 +58,10 @@ void WaveReader::read_header()
 {
     header_ = WAVE_FMT();
 
-    reads(header_.riff, 4);
+    check(header_.riff, 4, "RIFF");
     header_.file_size        = endian32();
-    reads(header_.wave, 4);
-    reads(header_.fmt, 4);
+    check(header_.wave, 4, "WAVE");
+    check(header_.fmt, 4, "fmt ");
     header_.len1             = endian32();
     header_.format           = endian16();
     header_.num_channels     = endian16();
@@ -49,21 +69,7 @@ void WaveReader::read_header()
     header_.bit_rate         = endian32();
     header_.type             = endian16();
     header_.bit_per_sample   = endian16();
-
-    // Check List Chunk
-    uint8 list_test[4];
-    reads(list_test, 4);
-    if(!is_data(list_test))
-    {
-        uint32 list_length = endian32();
-        file_ptr_ += list_length;
-        reads(header_.data, 4);
-    }
-    else
-    {
-        for(size_t copy = 0 ; copy < 4 ; copy++)
-            header_.data[copy] = list_test[copy];    
-    }
+    check(header_.data, 4, "data");
     header_.data_size        = endian32();
 }
 
@@ -222,10 +228,6 @@ WaveReader::WaveReader(wchar_t* file_path)
     concat();
     for(size_t idx = 1 ; idx < out_.size() ; idx++) FourierLib::free_stft_out(out_[idx]);
     delete[] norm_data;
-
-    
-    // while(debug_lock) {}
-    if(!debug_lock) debug_lock = true;
 }
 
 std::vector<std::string> WaveReader::print_info()

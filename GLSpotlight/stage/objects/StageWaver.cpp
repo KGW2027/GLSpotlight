@@ -46,7 +46,7 @@ void StageWaver::stop()
 
 void StageWaver::play()
 {
-    while(!music_reader_->is_ready()) {}
+    while(!music_reader_->is_ready()) {  }
     
     is_terminated_ = false;
     StageBuilder::set_curtain_mode(true);

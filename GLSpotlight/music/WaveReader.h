@@ -11,8 +11,6 @@ typedef std::vector<STFT_Out> Out;
 
 class WaveReader
 {
-    static bool debug_lock;
-    
     wchar_t*      file_path_    ;
     FILE*         target_file_  ;
     uint8         *buffer_      ;
@@ -24,6 +22,7 @@ class WaveReader
 
     void   fill_buffer();
     uint8  read();
+    void   check(uint8* arr, size_t len, const char* test);
     void   reads(uint8* arr, size_t len);
     void   read_header();
 

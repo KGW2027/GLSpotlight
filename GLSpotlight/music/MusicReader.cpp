@@ -113,7 +113,7 @@ void MusicReader::terminate()
         
         processor_.debug.clear();
     }
-    
+
     is_terminated_ = true;
 }
 
@@ -121,7 +121,7 @@ void MusicReader::set_path(const wchar_t* new_path)
 {
     path_ = new_path;
     if (!is_file_exists(path_)) return;
-    
+
     wav_reader_ = new WaveReader(const_cast<wchar_t*>(path_));
     processor_  = wav_reader_->make_processor();
     
